@@ -103,7 +103,7 @@ check__webimage25(){
     fi
 }
 check_webimage(){
-    echo "Check Q3 (2): Container image webimage..."
+    echo "Check Q3 (b): Container image webimage..."
 
     su - linda -c "podman images | grep -w webimage" &>/dev/null
     st=$?
