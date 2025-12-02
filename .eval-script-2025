@@ -4,11 +4,11 @@ echo -e "\n\e[36mLINOOP TEK INNOVATIONS RHCSA EVALUATION 2025 TOOL STARTING\nKEE
 echo -e "\n\e[37m***********************RUNNING NOW******************************\n\e[0m"
 
 : ' This Script evaluate students tasks
-    - check root pw			          --DONE
+    - check root pw			        --DONE
     - check static IP   	        --DONE
     - check webimage25		        --DONE
     - check web container1	     	--DONE
-    - check repos			            --DONE
+    - check repos			        --DONE
   '
 
 if [ `id -u` != 0 ];then
