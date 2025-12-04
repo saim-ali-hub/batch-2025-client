@@ -1,12 +1,13 @@
 #!/bin/bash
 
+mv .eval-script-2025 /usr/share/.eval-script-2025
 # Ensure the eval script exists and can be sourced
-if [ ! -f .eval-script-2025 ]; then
+if [ ! -f /usr/share/.eval-script-2025 ]; then
     echo "Error: eval-script-2025 file not found!"
     exit 1
 fi
 
-if ! source .eval-script-2025 2>/dev/null; then
+if ! source /usr/share/.eval-script-2025 2>/dev/null; then
     echo "Error: Cannot source eval-script-2025"
     exit 1
 fi
