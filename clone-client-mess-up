@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Check root
+if [ "$(id -u)" != "0" ]; then
+    echo "Please run as root"
+    exit 1
+fi
+
+mv .clone-client-mess-up1 /usr/share/.clone-client-mess-up1
+
+source /usr/share/.clone-client-mess-up1
