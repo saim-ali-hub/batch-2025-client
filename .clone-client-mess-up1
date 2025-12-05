@@ -26,7 +26,9 @@ dnf remove -y chrony &>/dev/null
 
 echo "RUNNING TASK 3 ......................."
 echo "complex_abc_1245*abc!!!!!" | passwd --stdin root
-
+echo "REBOOTING YOUR SYSTEM"
+sleep 0
+shutdown -r now
 }
 changing_other_configurations(){
 echo "RUNNING TASK 4 ......................."
