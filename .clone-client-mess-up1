@@ -1,34 +1,54 @@
 #!/bin/bash
 
+echo -e "\n\e[36mLINOOP TEK INNOVATIONS CONFGIURATION TOOL STARTING\nKEEP CALM AND SIT TIGHT\e[0m"
+echo -e "\n\e[37m***********************RUNNING NOW******************************\n\e[0m"
+
+: ' This Script configures environemnt and make machine ready
+    - change root pw, repos, chrony             --DONE
+    - changes other required configurations     --DONE
+  '
+
 if [ `id -u` != 0 ];then
         echo ""
-        echo -e "\e[31m Failed: Please Run this Script as root\e[0m\n"
+        echo -e "\e[31mFailed: Please Run this Script as root\e[0m\n"
         exit 1
 fi
-
+#------------------------------------------------------------------------------------------------
+change_rootpw_repos_chrony() {
 echo "RUNNING TASK 1 ......................."
 rm -rf /etc/yum.repos.d/*
 
 echo "RUNNING TASK 2 ......................."
-yum -y remove nfs-utils autofs > /dev/null 2>&1
+#Uninstall chrony and remove server line from /etc/chrony.conf
+sed -i '/^server[[:space:]]\+.*iburst/d' /etc/chrony.conf 2>/dev/null
+systemctl disable chronyd --now 2>/dev/null
+yum remove -y chrony &>/dev/null
 
 echo "RUNNING TASK 3 ......................."
+echo "complex_abc_1245*abc!!!!!" | passwd --stdin root
+
+}
+change_other_configurations(){
+echo "RUNNING TASK 4 ......................."
+yum -y remove nfs-utils autofs > /dev/null 2>&1
+
+echo "RUNNING TASK 5 ......................."
 userdel -r user1
 
-echo "RUNNING TASK 4 ......................."
-groupdel admins
+echo "RUNNING TASK 6 ......................."
+groupdel developers
 userdel -r max
 userdel -r bob
 userdel -r chris
 
-echo "RUNNING TASK 5 ......................."
-EDITOR="sed -i '/^%admin/d'" visudo
+echo "RUNNING TASK 7 ......................."
+EDITOR="sed -i '/^%developers/d'" visudo
 sed -i '/^umask\b/d' /home/bob/.bashrc
 chage -d "" -E -1 max
 sudo sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS   99999/' /etc/login.defs
 dnf groupremove -q "RPM Development Tools" -y &>/dev/null
 
-echo "RUNNING TASK 6 ......................."
+echo "RUNNING TASK 8 ......................."
 systemctl stop httpd &>/dev/null
 sed -i 's/^Listen .*/Listen 82/' /etc/httpd/conf/httpd.conf &>/dev/null
 if semanage port -l | grep -q '^http_port_t.*82'; then
@@ -37,13 +57,11 @@ fi
 firewall-cmd --remove-port=82/tcp --permanent &>/dev/null
 firewall-cmd --reload &>/dev/null
 
-echo "RUNNING TASK 7 ......................."
+echo "RUNNING TASK 9 ......................."
 rm -rf /web1 &>/dev/null
 mkdir -p /web1
 echo "I am Enjoying RHCSA preparation" > /web1/index.html
 sed -i 's|^DocumentRoot .*|DocumentRoot "/web1"|' /etc/httpd/conf/httpd.conf &>/dev/null
 sed -i '0,/<Directory "\/var\/www">/s#<Directory "/var/www">#<Directory "/web1">#' /etc/httpd/conf/httpd.conf &>/dev/null
 systemctl restart httpd &>/dev/null
-
-echo "RUNNING TASK 8 ......................."
-echo "complex_abc_1245*abc!!!!!" | passwd --stdin root
+}
