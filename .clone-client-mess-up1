@@ -4,8 +4,8 @@ echo -e "\n\e[36mLINOOP TEK INNOVATIONS CONFGIURATION TOOL STARTING\nKEEP CALM A
 echo -e "\n\e[37m***********************RUNNING NOW******************************\n\e[0m"
 
 : ' This Script configures environemnt and make machine ready
-    - change root pw, repos, chrony             --DONE
-    - changes other required configurations     --DONE
+    - changing_rootpw_repos_chrony             --DONE
+    - changing_other_configurations     --DONE
   '
 
 if [ `id -u` != 0 ];then
@@ -14,7 +14,7 @@ if [ `id -u` != 0 ];then
         exit 1
 fi
 #------------------------------------------------------------------------------------------------
-change_rootpw_repos_chrony() {
+changing_rootpw_repos_chrony() {
 echo "RUNNING TASK 1 ......................."
 rm -rf /etc/yum.repos.d/*
 
@@ -28,7 +28,7 @@ echo "RUNNING TASK 3 ......................."
 echo "complex_abc_1245*abc!!!!!" | passwd --stdin root
 
 }
-change_other_configurations(){
+changing_other_configurations(){
 echo "RUNNING TASK 4 ......................."
 yum -y remove nfs-utils autofs > /dev/null 2>&1
 
