@@ -6,20 +6,22 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-mv .clone-client-mess-up1 /usr/share/.clone-client-mess-up1
+mv .clone-client-mess-up1 /usr/share/.clone-client-mess-up1 2>/dev/null
+
 # Ensure the eval script exists and can be sourced
 if [ ! -f /usr/share/.clone-client-mess-up1 ]; then
-    echo "Error: .clone-clinet-mess-up file not found!"
+    echo "Error: .clone-client-mess-up1 file not found!"
     exit 1
 fi
 
 if ! source /usr/share/.clone-client-mess-up1 2>/dev/null; then
-    echo "Error: Cannot source .clone-clinet-mess-up1 file"
+    echo "Error: Cannot source .clone-client-mess-up1 file"
     exit 1
 fi
+
 echo "select 1 for change_rootpw_repos_chrony or select 2 for changing_other_configurations"
 while true; do
-    read -p "Please select code (all or 1,2 or q to quit): " code
+    read -p "Please select code (1, 2 or q to quit): " code
     code=$(echo "$code" | tr '[:upper:]' '[:lower:]')
     echo ""
 
