@@ -22,7 +22,7 @@ echo "RUNNING TASK 2 ......................."
 #Uninstall chrony and remove server line from /etc/chrony.conf
 sed -i '/^server[[:space:]]\+.*iburst/d' /etc/chrony.conf 2>/dev/null
 systemctl disable chronyd --now 2>/dev/null
-yum remove -y chrony &>/dev/null
+dnf remove -y chrony &>/dev/null
 
 echo "RUNNING TASK 3 ......................."
 echo "complex_abc_1245*abc!!!!!" | passwd --stdin root
