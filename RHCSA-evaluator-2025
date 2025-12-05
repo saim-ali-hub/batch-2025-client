@@ -30,6 +30,7 @@ while true; do
             check_pdf_file_conversion
             ;;
         5) check_repos ;;
+        6) check_chrony ;;
         q) break ;;
         *) echo "You did not select a valid question number." ;;
     esac
