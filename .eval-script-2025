@@ -9,8 +9,8 @@ echo -e "\n\e[37m***********************RUNNING NOW*****************************
     - check webimage25		        --DONE
     - check web container1	     	--DONE
     - check repos			        --DONE
+    - check chrony			        --DONE
   '
-
 if [ `id -u` != 0 ];then
         echo ""
         echo -e "\e[31mFailed: Please Run this Script as root\e[0m\n"
@@ -266,24 +266,36 @@ app_chk=$(yum repolist enabled | grep -i AppStream | wc -l)
 base_chk=$(yum repolist enabled | grep -i BaseOs | wc -l)
 
    if [ "$app_chk" -eq 0 ];then
-
      echo -e "\e[31mAPPSTREAM_Check: Fail\e[0m\n"
-
    else
-
      echo -e "\e[32mAPPSTREAM_Check: Pass\e[0m\n"
-
    fi
-
    if [ "$base_chk" -eq 0 ];then
-
      echo -e "\e[31mBASEOS_Check: Fail\e[0m\n"
-
    else
-
      echo -e "\e[32mBASEOS_Check: Pass\e[0m\n"
-
    fi
-
 }
 #####################################################################################
+check_chrony() {
+    echo "Checking Chrony service..."
+    
+    # Service check
+    if systemctl is-active --quiet chronyd; then
+        echo -e "\e[32mChrony service: Active\e[0m"
+    else
+        echo -e "\e[31mChrony service: Inactive\e[0m"
+        return 1
+    fi
+
+    # Synchronization check
+    leap_status=$(chronyc tracking | grep "Leap status" | awk '{print $3}')
+    if [ "$leap_status" = "Normal" ]; then
+        echo -e "\e[32mChrony sync: OK : Pass\e[0m"
+    else
+        echo -e "\e[31mChrony sync: Not synchronized : Fail\e[0m"
+        chronyc sources -v
+        return 1
+    fi
+}
+######################################################################################
