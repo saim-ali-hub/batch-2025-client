@@ -7,7 +7,10 @@ echo -e "\n\e[37m***********************RUNNING NOW*****************************
     - check root pw			        --DONE
     - check static IP   	        --DONE
     - check webimage25		        --DONE
+    - check_webimage                --DONE
     - check web container1	     	--DONE
+    - check myweb                   --DONE
+    - check pdf file conversion     --DONE
     - check repos			        --DONE
     - check chrony			        --DONE
   '
