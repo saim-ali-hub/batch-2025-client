@@ -17,15 +17,15 @@ if ! source /usr/share/.clone-clinet-mess-up1 2>/dev/null; then
     echo "Error: Cannot source .clone-clinet-mess-up1 file"
     exit 1
 fi
-
+echo "select 1 for change_rootpw_repos_chrony or select 2 for changing_other_configurations"
 while true; do
     read -p "Please select code (all or 1,2 or q to quit): " code
     code=$(echo "$code" | tr '[:upper:]' '[:lower:]')
     echo ""
 
     case "$code" in
-        1) messup_rootPW_repos_chrony ;;
-        2) messup_rest ;;
+        1) changing_rootpw_repos_chrony ;;
+        2) changing_other_configurations ;;
         q) break ;;
         *) echo "You did not select a valid code number." ;;
     esac
