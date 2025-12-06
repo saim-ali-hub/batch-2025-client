@@ -44,7 +44,10 @@ while true; do
             check_repos
             check_chrony
             ;;
-        q) break ;;
+        q|quit|exit)
+            echo "Exiting..."
+            break
+            ;;
         *) echo "You did not select a valid question number." ;;
     esac
 done
