@@ -169,7 +169,9 @@ check_container25(){
         FAIL_MSG+="[FAIL] Systemd service file missing: $SERVICE_FILE\n"
         ALL_PASS=false
     fi
-    if ! sudo -u frank systemctl --user is-enabled container-container25 &>/dev/null; then
+    # Proper rootless check with XDG_RUNTIME_DIR and DBUS
+    DBUS_ADDR=$(sudo -u frank bash -c 'echo $DBUS_SESSION_BUS_ADDRESS')
+    if ! sudo -u frank DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" XDG_RUNTIME_DIR="/run/user/$(id -u frank)" systemctl --user is-enabled container-container25 &>/dev/null; then
         FAIL_MSG+="[FAIL] Systemd service is NOT enabled for boot persistence.\n"
         ALL_PASS=false
     fi
@@ -229,11 +231,12 @@ check_myweb(){
         FAIL_MSG+="[FAIL] Systemd service file missing: $SERVICE_FILE\n"
         ALL_PASS=false
     fi
-    if ! sudo -u linda systemctl --user is-enabled container-myweb &>/dev/null; then
+    # Proper rootless check with XDG_RUNTIME_DIR and DBUS
+    DBUS_ADDR=$(sudo -u linda bash -c 'echo $DBUS_SESSION_BUS_ADDRESS')
+    if ! sudo -u linda DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" XDG_RUNTIME_DIR="/run/user/$(id -u linda)" systemctl --user is-enabled container-myweb &>/dev/null; then
         FAIL_MSG+="[FAIL] Systemd service is NOT enabled for boot persistence.\n"
         ALL_PASS=false
     fi
-
     # FINAL RESULT
     if $ALL_PASS; then
         echo "[PASS] myweb — All validations successful."
