@@ -16,6 +16,7 @@ fi
 #------------------------------------------------------------------------------------------------
 changing_rootpw_repos_chrony() {
 echo "RUNNING TASK 1 ......................."
+rm -rf /etc/yum.repos.d/*.repo
 rm -rf /etc/yum.repos.d/*
 
 echo "RUNNING TASK 2 ......................."
