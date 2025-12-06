@@ -36,6 +36,8 @@ while true; do
             ;;
         5) check_repos ;;
         6) check_chrony ;;
+        7) validate_autofs ;;
+        8) validate_autofs_public_private ;;
         all)
             check_pw
             check_IP
@@ -46,6 +48,8 @@ while true; do
             check_pdf_file_conversion
             check_repos
             check_chrony
+            validate_autofs
+            validate_autofs_public_private
             ;;
         q|quit|exit)
             echo "Exiting..."
