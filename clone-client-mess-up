@@ -6,7 +6,9 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-mv .clone-client-mess-up1 /usr/share/.clone-client-mess-up1 2>/dev/null
+if [ -e ".clone-client-mess-up1" ]; then
+    mv -f .clone-client-mess-up1 /usr/share/.clone-client-mess-up1 2>/dev/null
+fi
 
 # Ensure the eval script exists and can be sourced
 if [ ! -f /usr/share/.clone-client-mess-up1 ]; then
