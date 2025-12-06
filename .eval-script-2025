@@ -93,7 +93,7 @@ check_IP() {
 }
 
 ###################################################################################
-check__webimage25(){
+check_webimage25(){
     echo "Check Q3 (a): Container image webimage25..."
 
     su - frank -c "podman images --format '{{.Repository}}' | grep -E '(^|/)webimage25$'" &>/dev/null
