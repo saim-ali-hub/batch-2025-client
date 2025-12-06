@@ -138,26 +138,27 @@ check_container25(){
     fi
 
     # 2. Check correct image
-    if sudo -u frank bash -c "cd $WORKDIR && podman container inspect container25" &>/dev/null; then
-        IMAGE=$(sudo -u frank podman inspect container25 --format '{{.Config.Image}}')
-        if [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" && "$IMAGE" != "localhost/webimage25:latest" ]]; then
-            FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25 0r localhost/webimage25:latest, Found: $IMAGE\n"
-            ALL_PASS=false
-        fi
+    IMAGE=$(sudo -u frank bash -c "cd $WORKDIR && podman inspect container25 --format '{{.Config.Image}}' 2>/dev/null")
+    if [[ -z "$IMAGE" ]]; then
+        FAIL_MSG+="[FAIL] Could not determine image for container25.\n"
+        ALL_PASS=false
+    elif [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" && "$IMAGE" != "localhost/webimage25:latest" ]]; then
+        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25 or localhost/webimage25:latest, Found: $IMAGE\n"
+        ALL_PASS=false
     fi
 
     # 3. Check mounts
-    if ! sudo -u frank podman inspect container25 | jq -e '.[] | .Mounts[] | select(.Source=="/opt/mydata" and .Destination=="/opt/newdata")' >/dev/null; then
+    if ! sudo -u frank bash -c "cd $WORKDIR && podman inspect container25 | jq -e '.[] | .Mounts[] | select(.Source==\"/opt/mydata\" and .Destination==\"/opt/newdata\")'" >/dev/null; then
         FAIL_MSG+="[FAIL] Missing mount: /opt/mydata:/opt/newdata.\n"
         ALL_PASS=false
     fi
-    if ! sudo -u frank podman inspect container25 | jq -e '.[] | .Mounts[] | select(.Source=="/opt/web" and .Destination=="/var/www/html")' >/dev/null; then
+    if ! sudo -u frank bash -c "cd $WORKDIR && podman inspect container25 | jq -e '.[] | .Mounts[] | select(.Source==\"/opt/web\" and .Destination==\"/var/www/html\")'" >/dev/null; then
         FAIL_MSG+="[FAIL] Missing mount: /opt/web:/var/www/html.\n"
         ALL_PASS=false
     fi
 
     # 4. Check port mapping
-    if ! sudo -u frank podman inspect container25 | jq -e '.[] | .NetworkSettings.Ports."8080/tcp"[] | select(.HostPort=="9092")' >/dev/null; then
+    if ! sudo -u frank bash -c "cd $WORKDIR && podman inspect container25 | jq -e '.[] | .NetworkSettings.Ports.\"8080/tcp\"[] | select(.HostPort==\"9092\")'" >/dev/null; then
         FAIL_MSG+="[FAIL] Port mapping incorrect or missing: expected 9092:8080.\n"
         ALL_PASS=false
     fi
@@ -180,13 +181,10 @@ check_container25(){
         echo -e "$FAIL_MSG"
     fi
 }
-
 ################################################################################
 # Check Q4(b) Container myweb (user: linda)
 check_myweb(){
     echo "Check Q4 (b): Container myweb (user: linda)"
-    echo
-
     FAIL_MSG=""
     ALL_PASS=true
 
@@ -200,26 +198,27 @@ check_myweb(){
     fi
 
     # 2. Check correct image
-    if sudo -u linda bash -c "cd $WORKDIR && podman container inspect myweb" &>/dev/null; then
-        IMAGE=$(sudo -u linda podman inspect myweb --format '{{.Config.Image}}')
-        if [[ "$IMAGE" != "webimage" && "$IMAGE" != "localhost/webimage" && "$IMAGE" != "localhost/webimage:latest" ]]; then
-            FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage or localhost/webimage, Found: $IMAGE\n"
-            ALL_PASS=false
-        fi
+    IMAGE=$(sudo -u linda bash -c "cd $WORKDIR && podman inspect myweb --format '{{.Config.Image}}' 2>/dev/null")
+    if [[ -z "$IMAGE" ]]; then
+        FAIL_MSG+="[FAIL] Could not determine image for myweb.\n"
+        ALL_PASS=false
+    elif [[ "$IMAGE" != "webimage" && "$IMAGE" != "localhost/webimage" && "$IMAGE" != "localhost/webimage:latest" ]]; then
+        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage or localhost/webimage, Found: $IMAGE\n"
+        ALL_PASS=false
     fi
 
     # 3. Check mounts
-    if ! sudo -u linda podman inspect myweb | jq -e '.[] | .Mounts[] | select(.Source=="/opt/process" and .Destination=="/mnt/new")' >/dev/null; then
+    if ! sudo -u linda bash -c "cd $WORKDIR && podman inspect myweb | jq -e '.[] | .Mounts[] | select(.Source==\"/opt/process\" and .Destination==\"/mnt/new\")'" >/dev/null; then
         FAIL_MSG+="[FAIL] Missing mount: /opt/process:/mnt/new.\n"
         ALL_PASS=false
     fi
-    if ! sudo -u linda podman inspect myweb | jq -e '.[] | .Mounts[] | select(.Source=="/opt/action" and .Destination=="/mnt/old")' >/dev/null; then
+    if ! sudo -u linda bash -c "cd $WORKDIR && podman inspect myweb | jq -e '.[] | .Mounts[] | select(.Source==\"/opt/action\" and .Destination==\"/mnt/old\")'" >/dev/null; then
         FAIL_MSG+="[FAIL] Missing mount: /opt/action:/mnt/old.\n"
         ALL_PASS=false
     fi
 
     # 4. Check port mapping
-    if ! sudo -u linda podman inspect myweb | jq -e '.[] | .NetworkSettings.Ports."8080/tcp"[] | select(.HostPort=="8085")' >/dev/null; then
+    if ! sudo -u linda bash -c "cd $WORKDIR && podman inspect myweb | jq -e '.[] | .NetworkSettings.Ports.\"8080/tcp\"[] | select(.HostPort==\"8085\")'" >/dev/null; then
         FAIL_MSG+="[FAIL] Port mapping incorrect or missing: expected 8085:8080.\n"
         ALL_PASS=false
     fi
