@@ -260,7 +260,7 @@ check_pdf_file_conversion(){
 
 ################################################################################
 check_repos(){
-   echo "Checking Repositories.........."
+   echo "Q5: Checking Repositories.........."
 app_chk=$(yum repolist enabled | grep -i AppStream | wc -l)
 base_chk=$(yum repolist enabled | grep -i BaseOs | wc -l)
 
@@ -277,7 +277,7 @@ base_chk=$(yum repolist enabled | grep -i BaseOs | wc -l)
 }
 #####################################################################################
 check_chrony() {
-    echo "Checking Chrony service..."
+    echo "Q6: Checking Chrony service..."
     
     # Service active?
     if systemctl is-active --quiet chronyd; then
@@ -297,3 +297,81 @@ check_chrony() {
     fi
 }
 ######################################################################################
+user_name="user1"
+validate_autofs() {
+    echo "Q7: Checking Autofs......."
+
+    # cleanup any previous test file
+    rm -f /rhome/$user_name/uniq1 &>/dev/null
+
+    # access the path to trigger autofs mount
+    su - $user_name -c "touch /rhome/$user_name/uniq1" &>/dev/null
+    file_st=$?
+
+    # now check if autofs mounted it
+    mount | grep "/rhome/$user_name" &>/dev/null
+    mn_st=$?
+
+    if [ $file_st -eq 0 ] && [ $mn_st -eq 0 ]; then
+        echo -e "\e[32mAutoFS_Check: Pass\e[0m\n"
+    else
+        echo -e "\e[31mAutoFS_Check: Fail\e[0m\n"
+    fi
+}
+######################################################################################
+validate_autofs_public_private() {
+    echo "Q8: Validating Autofs Public/Private Shares..."
+    # paths
+    pub="/automount/public"
+    priv="/automount/private"
+    testfile_pub="$pub/testfile"
+    testfile_priv="$priv/testfile"
+
+    # --- 1. Trigger autofs mounts ---
+    ls $pub &>/dev/null
+    pub_access=$?
+
+    ls $priv &>/dev/null
+    priv_access=$?
+
+    # --- 2. Check mount status ---
+    mount | grep "$pub" &>/dev/null
+    pub_mounted=$?
+
+    mount | grep "$priv" &>/dev/null
+    priv_mounted=$?
+
+    # --- 3. Check Public is READ-ONLY ---
+    touch $testfile_pub &>/dev/null
+    pub_write=$?    # must fail → should return non-zero
+
+    # --- 4. Check Private is READ-WRITE ---
+    touch $testfile_priv &>/dev/null
+    priv_write=$?   # must succeed → 0
+
+    # --- 5. Autounmount Test ---
+    sleep 5         # small wait to allow autofs to unmount
+    mount | grep "$pub" &>/dev/null
+    pub_unmount=$?
+
+    mount | grep "$priv" &>/dev/null
+    priv_unmount=$?
+
+    # --- Final Result ---
+    if [[ $pub_access -eq 0 && $priv_access -eq 0 \
+          && $pub_mounted -eq 0 && $priv_mounted -eq 0 \
+          && $pub_write -ne 0 && $priv_write -eq 0 ]]; then
+
+        echo -e "\e[32mAutofs_Mount_Check: Pass\e[0m"
+    else
+        echo -e "\e[31mAutofs_Mount_Check: Fail\e[0m"
+    fi
+    # --- Autounmount Feedback (not counted in Pass/Fail) ---
+    if [[ $pub_unmount -ne 0 && $priv_unmount -ne 0 ]]; then
+        echo -e "\e[32mAuto_Unmount: Working\e[0m"
+    else
+        echo -e "\e[33mAuto_Unmount: Not yet unmounted (may need more idle time)\e[0m"
+    fi
+}
+######################################################################################
+
