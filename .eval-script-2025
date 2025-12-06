@@ -1,8 +1,8 @@
 #!/bin/bash
-
+eval_banner() {
 echo -e "\n\e[36mLINOOP TEK INNOVATIONS RHCSA EVALUATION 2025 TOOL STARTING\nKEEP CALM AND SIT TIGHT\e[0m"
 echo -e "\n\e[37m***********************RUNNING NOW******************************\n\e[0m"
-
+}
 : ' This Script evaluate students tasks
     - check root pw			        --DONE
     - check static IP   	        --DONE
