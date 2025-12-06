@@ -105,9 +105,12 @@ check_webimage25(){
         echo -e "\e[31mCheck Q3a webimage25: Fail\e[0m\n"
     fi
 }
+################################################################################
+# Check Q3(b) Container image webimage (user: linda)
 check_webimage(){
     echo "Check Q3 (b): Container image webimage..."
-    su - frank -c "podman images --format '{{.Repository}}' | grep -E '(^|/)webimage$'" &>/dev/null
+    
+    su - linda -c "cd /home/linda && podman images --format '{{.Repository}}' | grep -E '(^|/)webimage$'" &>/dev/null
     st=$?
 
     if [ $st -eq 0 ]; then
@@ -116,137 +119,129 @@ check_webimage(){
         echo -e "\e[31mCheck Q3(b) webimage: Fail\e[0m\n"
     fi
 }
+
 ################################################################################
+# Check Q4(a) Container container25 (user: frank)
 check_container25(){
     echo "Check Q4 (a): Container25 (user: frank) ====="
-echo
+    echo
 
-FAIL_MSG=""
-ALL_PASS=true
+    FAIL_MSG=""
+    ALL_PASS=true
 
-# Rootless container storage path
-export XDG_RUNTIME_DIR="/run/user/$(id -u frank)"
+    export XDG_RUNTIME_DIR="/run/user/$(id -u frank)"
+    WORKDIR="/home/frank"
 
-### 1. Check container exists
-if ! sudo -u frank podman container inspect container25 &>/dev/null; then
-    FAIL_MSG+="[FAIL] Container 'container25' does not exist (for user frank).\n"
-    ALL_PASS=false
-fi
-
-### 2. Check correct image
-if sudo -u frank podman container inspect container25 &>/dev/null; then
-    IMAGE=$(sudo -u frank podman inspect container25 --format '{{.Config.Image}}')                    
-     if [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" && "$IMAGE" != "localhost/webimage25:latest"  ]]; then
-        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25 or localhost/webimage25:latest, Found: $IMAGE\n"
+    # 1. Check container exists
+    if ! sudo -u frank bash -c "cd $WORKDIR && podman container inspect container25" &>/dev/null; then
+        FAIL_MSG+="[FAIL] Container 'container25' does not exist (for user frank).\n"
         ALL_PASS=false
     fi
-fi
 
-### 3. Check mount /opt/mydata:/opt/newdata
-if ! sudo -u frank podman inspect container25 | grep -q '"Source": "/opt/mydata", "Destination": "/opt/newdata"'; then
-    FAIL_MSG+="[FAIL] Missing mount: /opt/mydata:/opt/newdata.\n"
-    ALL_PASS=false
-fi
+    # 2. Check correct image
+    if sudo -u frank bash -c "cd $WORKDIR && podman container inspect container25" &>/dev/null; then
+        IMAGE=$(sudo -u frank podman inspect container25 --format '{{.Config.Image}}')
+        if [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" && "$IMAGE" != "localhost/webimage25:latest" ]]; then
+            FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25, Found: $IMAGE\n"
+            ALL_PASS=false
+        fi
+    fi
 
-### 4. Check mount /opt/web:/var/www/html
-if ! sudo -u frank podman inspect container25 | grep -q '"Source": "/opt/web", "Destination": "/var/www/html"'; then
-    FAIL_MSG+="[FAIL] Missing mount: /opt/web:/var/www/html.\n"
-    ALL_PASS=false
-fi
+    # 3. Check mounts
+    if ! sudo -u frank podman inspect container25 | jq -e '.[] | .Mounts[] | select(.Source=="/opt/mydata" and .Destination=="/opt/newdata")' >/dev/null; then
+        FAIL_MSG+="[FAIL] Missing mount: /opt/mydata:/opt/newdata.\n"
+        ALL_PASS=false
+    fi
+    if ! sudo -u frank podman inspect container25 | jq -e '.[] | .Mounts[] | select(.Source=="/opt/web" and .Destination=="/var/www/html")' >/dev/null; then
+        FAIL_MSG+="[FAIL] Missing mount: /opt/web:/var/www/html.\n"
+        ALL_PASS=false
+    fi
 
-### 5. Check port mapping 9092:8080
-if ! sudo -u frank podman inspect container25 | grep -q '"8080/tcp": \[{"HostPort": "9092"}\]'; then
-    FAIL_MSG+="[FAIL] Port mapping incorrect or missing: expected 9092:8080.\n"
-    ALL_PASS=false
-fi
+    # 4. Check port mapping
+    if ! sudo -u frank podman inspect container25 | jq -e '.[] | .NetworkSettings.Ports."8080/tcp"[] | select(.HostPort=="9092")' >/dev/null; then
+        FAIL_MSG+="[FAIL] Port mapping incorrect or missing: expected 9092:8080.\n"
+        ALL_PASS=false
+    fi
 
-### 6. Check systemd service file exists
-SERVICE_FILE="/home/frank/.config/systemd/user/container-container25.service"
-if [ ! -f "$SERVICE_FILE" ]; then
-    FAIL_MSG+="[FAIL] Systemd service file missing: $SERVICE_FILE\n"
-    ALL_PASS=false
-fi
+    # 5. Check systemd service
+    SERVICE_FILE="/home/frank/.config/systemd/user/container-container25.service"
+    if [ ! -f "$SERVICE_FILE" ]; then
+        FAIL_MSG+="[FAIL] Systemd service file missing: $SERVICE_FILE\n"
+        ALL_PASS=false
+    fi
+    if ! sudo -u frank systemctl --user is-enabled container-container25 &>/dev/null; then
+        FAIL_MSG+="[FAIL] Systemd service is NOT enabled for boot persistence.\n"
+        ALL_PASS=false
+    fi
 
-### 7. Check systemd user service enabled (boot persistent)
-if sudo -u frank systemctl --user is-enabled container-container25 &>/dev/null; then
-    true
-else
-    FAIL_MSG+="[FAIL] Systemd service is NOT enabled for boot persistence.\n"
-    ALL_PASS=false
-fi
-
-### FINAL RESULT
-if $ALL_PASS; then
-    echo "[PASS] container25 — All validations successful."
-else
-    echo -e "$FAIL_MSG"
-fi
+    # FINAL RESULT
+    if $ALL_PASS; then
+        echo "[PASS] container25 — All validations successful."
+    else
+        echo -e "$FAIL_MSG"
+    fi
 }
+
+################################################################################
+# Check Q4(b) Container myweb (user: linda)
 check_myweb(){
     echo "Check Q4 (b): Container myweb (user: linda)"
-echo
+    echo
 
-FAIL_MSG=""
-ALL_PASS=true
+    FAIL_MSG=""
+    ALL_PASS=true
 
-# Ensure rootless environment points to linda user runtime
-export XDG_RUNTIME_DIR="/run/user/$(id -u linda)"
+    export XDG_RUNTIME_DIR="/run/user/$(id -u linda)"
+    WORKDIR="/home/linda"
 
-### 1. Check container exists
-if ! sudo -u linda podman container inspect myweb &>/dev/null; then
-    FAIL_MSG+="[FAIL] Container 'myweb' does not exist (for user linda).\n"
-    ALL_PASS=false
-fi
-
-### 2. Check correct image
-if sudo -u linda podman container inspect myweb &>/dev/null; then
-
-    IMAGE=$(sudo -u linda podman inspect myweb --format '{{.Config.Image}}')
-    if [[ "$IMAGE" != "webimage" && "$IMAGE" != "localhost/webimage" && "$IMAGE" != "localhost/webimage:latest" ]]; then
-        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage or localhost/webimage or localhost/webimage:latest, Found: $IMAGE\n"
+    # 1. Check container exists
+    if ! sudo -u linda bash -c "cd $WORKDIR && podman container inspect myweb" &>/dev/null; then
+        FAIL_MSG+="[FAIL] Container 'myweb' does not exist (for user linda).\n"
         ALL_PASS=false
     fi
-fi
 
-### 3. Check mount /opt/process:/mnt/new
-if ! sudo -u linda podman inspect myweb | grep -q '"Source": "/opt/process", "Destination": "/mnt/new"'; then
-    FAIL_MSG+="[FAIL] Missing mount: /opt/process:/mnt/new.\n"
-    ALL_PASS=false
-fi
+    # 2. Check correct image
+    if sudo -u linda bash -c "cd $WORKDIR && podman container inspect myweb" &>/dev/null; then
+        IMAGE=$(sudo -u linda podman inspect myweb --format '{{.Config.Image}}')
+        if [[ "$IMAGE" != "webimage" && "$IMAGE" != "localhost/webimage" && "$IMAGE" != "localhost/webimage:latest" ]]; then
+            FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage or localhost/webimage, Found: $IMAGE\n"
+            ALL_PASS=false
+        fi
+    fi
 
-### 4. Check mount /opt/action:/mnt/old
-if ! sudo -u linda podman inspect myweb | grep -q '"Source": "/opt/action", "Destination": "/mnt/old"'; then
-    FAIL_MSG+="[FAIL] Missing mount: /opt/action:/mnt/old.\n"
-    ALL_PASS=false
-fi
+    # 3. Check mounts
+    if ! sudo -u linda podman inspect myweb | jq -e '.[] | .Mounts[] | select(.Source=="/opt/process" and .Destination=="/mnt/new")' >/dev/null; then
+        FAIL_MSG+="[FAIL] Missing mount: /opt/process:/mnt/new.\n"
+        ALL_PASS=false
+    fi
+    if ! sudo -u linda podman inspect myweb | jq -e '.[] | .Mounts[] | select(.Source=="/opt/action" and .Destination=="/mnt/old")' >/dev/null; then
+        FAIL_MSG+="[FAIL] Missing mount: /opt/action:/mnt/old.\n"
+        ALL_PASS=false
+    fi
 
-### 5. Check port mapping 8085:8080
-if ! sudo -u linda podman inspect myweb | grep -q '"8080/tcp": \[{"HostPort": "8085"}\]'; then
-    FAIL_MSG+="[FAIL] Port mapping incorrect or missing: expected 8085:8080.\n"
-    ALL_PASS=false
-fi
+    # 4. Check port mapping
+    if ! sudo -u linda podman inspect myweb | jq -e '.[] | .NetworkSettings.Ports."8080/tcp"[] | select(.HostPort=="8085")' >/dev/null; then
+        FAIL_MSG+="[FAIL] Port mapping incorrect or missing: expected 8085:8080.\n"
+        ALL_PASS=false
+    fi
 
-### 6. Check systemd service file exists
-SERVICE_FILE="/home/linda/.config/systemd/user/container-myweb.service"
-if [ ! -f "$SERVICE_FILE" ]; then
-    FAIL_MSG+="[FAIL] Systemd service file missing: $SERVICE_FILE\n"
-    ALL_PASS=false
-fi
+    # 5. Check systemd service
+    SERVICE_FILE="/home/linda/.config/systemd/user/container-myweb.service"
+    if [ ! -f "$SERVICE_FILE" ]; then
+        FAIL_MSG+="[FAIL] Systemd service file missing: $SERVICE_FILE\n"
+        ALL_PASS=false
+    fi
+    if ! sudo -u linda systemctl --user is-enabled container-myweb &>/dev/null; then
+        FAIL_MSG+="[FAIL] Systemd service is NOT enabled for boot persistence.\n"
+        ALL_PASS=false
+    fi
 
-### 7. Check systemd user service enabled (boot persistent)
-if sudo -u linda systemctl --user is-enabled container-myweb &>/dev/null; then
-    true
-else
-    FAIL_MSG+="[FAIL] Systemd service is NOT enabled for boot persistence.\n"
-    ALL_PASS=false
-fi
-
-### FINAL RESULT
-if $ALL_PASS; then
-    echo "[PASS] myweb — All validations successful."
-else
-    echo -e "$FAIL_MSG"
-fi
+    # FINAL RESULT
+    if $ALL_PASS; then
+        echo "[PASS] myweb — All validations successful."
+    else
+        echo -e "$FAIL_MSG"
+    fi
 }
 
 check_pdf_file_conversion(){
@@ -283,7 +278,7 @@ base_chk=$(yum repolist enabled | grep -i BaseOs | wc -l)
 check_chrony() {
     echo "Checking Chrony service..."
     
-    # Service check
+    # Service active?
     if systemctl is-active --quiet chronyd; then
         echo -e "\e[32mChrony service: Active\e[0m"
     else
@@ -291,14 +286,13 @@ check_chrony() {
         return 1
     fi
 
-    # Synchronization check
-    leap_status=$(chronyc tracking | grep "Leap status" | awk '{print $3}')
+    # Leap status check – correct field
+    leap_status=$(chronyc tracking | awk -F': ' '/Leap status/ {print $2}')
+    
     if [ "$leap_status" = "Normal" ]; then
         echo -e "\e[32mChrony sync: OK : Pass\e[0m"
     else
         echo -e "\e[31mChrony sync: Not synchronized : Fail\e[0m"
-        chronyc sources -v
-        return 1
     fi
 }
 ######################################################################################
