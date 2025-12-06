@@ -136,8 +136,8 @@ fi
 ### 2. Check correct image
 if sudo -u frank podman container inspect container25 &>/dev/null; then
     IMAGE=$(sudo -u frank podman inspect container25 --format '{{.Config.Image}}')                    
-     if [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" ]]; then
-        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25, Found: $IMAGE\n"
+     if [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" && "$IMAGE" != "localhost/webimage25:latest"  ]]; then
+        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25 or localhost/webimage25:latest, Found: $IMAGE\n"
         ALL_PASS=false
     fi
 fi
@@ -202,8 +202,8 @@ fi
 if sudo -u linda podman container inspect myweb &>/dev/null; then
 
     IMAGE=$(sudo -u linda podman inspect myweb --format '{{.Config.Image}}')
-    if [[ "$IMAGE" != "webimage" && "$IMAGE" != "localhost/webimage" ]]; then
-        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage or localhost/webimage, Found: $IMAGE\n"
+    if [[ "$IMAGE" != "webimage" && "$IMAGE" != "localhost/webimage" && "$IMAGE" != "localhost/webimage:latest" ]]; then
+        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage or localhost/webimage or localhost/webimage:latest, Found: $IMAGE\n"
         ALL_PASS=false
     fi
 fi
