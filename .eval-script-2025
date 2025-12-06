@@ -96,7 +96,7 @@ check_IP() {
 check__webimage25(){
     echo "Check Q3 (a): Container image webimage25..."
 
-    su - frank -c "podman images | grep -w webimage25" &>/dev/null
+    su - frank -c "podman images --format '{{.Repository}}' | grep -E '(^|/)webimage25$'" &>/dev/null
     st=$?
 
     if [ $st -eq 0 ]; then
@@ -107,8 +107,7 @@ check__webimage25(){
 }
 check_webimage(){
     echo "Check Q3 (b): Container image webimage..."
-
-    su - linda -c "podman images | grep -w webimage" &>/dev/null
+    su - frank -c "podman images --format '{{.Repository}}' | grep -E '(^|/)webimage$'" &>/dev/null
     st=$?
 
     if [ $st -eq 0 ]; then
@@ -136,9 +135,9 @@ fi
 
 ### 2. Check correct image
 if sudo -u frank podman container inspect container25 &>/dev/null; then
-    IMAGE=$(sudo -u frank podman inspect container25 --format '{{.Config.Image}}')
-    if [[ "$IMAGE" != "webimage25" ]]; then
-        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25, Found: $IMAGE\n"
+    IMAGE=$(sudo -u frank podman inspect container25 --format '{{.Config.Image}}')                    
+     if [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" ]]; then
+        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25, Found: $IMAGE\n"
         ALL_PASS=false
     fi
 fi
@@ -201,9 +200,10 @@ fi
 
 ### 2. Check correct image
 if sudo -u linda podman container inspect myweb &>/dev/null; then
+
     IMAGE=$(sudo -u linda podman inspect myweb --format '{{.Config.Image}}')
-    if [[ "$IMAGE" != "webimage" ]]; then
-        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage, Found: $IMAGE\n"
+    if [[ "$IMAGE" != "webimage" && "$IMAGE" != "localhost/webimage" ]]; then
+        FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage or localhost/webimage, Found: $IMAGE\n"
         ALL_PASS=false
     fi
 fi
