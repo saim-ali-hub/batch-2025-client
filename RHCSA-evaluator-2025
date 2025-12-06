@@ -14,6 +14,9 @@ if ! source /usr/share/.eval-script-2025 2>/dev/null; then
     exit 1
 fi
 
+# Call startup banner function once
+eval_banner
+
 while true; do
     read -p "Please select question (all or 1,2,3,4,5,..... or q to quit): " question
     question=$(echo "$question" | tr '[:upper:]' '[:lower:]')
