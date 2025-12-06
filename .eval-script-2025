@@ -93,10 +93,11 @@ check_IP() {
 }
 
 ###################################################################################
+# Check Q3(b) Container image webimage (user: frank)
 check_webimage25(){
-    echo "Check Q3 (a): Container image webimage25..."
+    echo "Check Q3 (a): Container image webimage25 (user: frank)"
 
-    su - frank -c "podman images --format '{{.Repository}}' | grep -E '(^|/)webimage25$'" &>/dev/null
+    su - frank -c "cd /home/frank && podman images --format '{{.Repository}}' | grep -E '(^|/)webimage25$'" &>/dev/null
     st=$?
 
     if [ $st -eq 0 ]; then
@@ -108,7 +109,7 @@ check_webimage25(){
 ################################################################################
 # Check Q3(b) Container image webimage (user: linda)
 check_webimage(){
-    echo "Check Q3 (b): Container image webimage..."
+    echo "Check Q3 (b): Container image webimage (user: linda)"
     
     su - linda -c "cd /home/linda && podman images --format '{{.Repository}}' | grep -E '(^|/)webimage$'" &>/dev/null
     st=$?
@@ -124,8 +125,6 @@ check_webimage(){
 # Check Q4(a) Container container25 (user: frank)
 check_container25(){
     echo "Check Q4 (a): Container25 (user: frank) ====="
-    echo
-
     FAIL_MSG=""
     ALL_PASS=true
 
@@ -142,7 +141,7 @@ check_container25(){
     if sudo -u frank bash -c "cd $WORKDIR && podman container inspect container25" &>/dev/null; then
         IMAGE=$(sudo -u frank podman inspect container25 --format '{{.Config.Image}}')
         if [[ "$IMAGE" != "webimage25" && "$IMAGE" != "localhost/webimage25" && "$IMAGE" != "localhost/webimage25:latest" ]]; then
-            FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25, Found: $IMAGE\n"
+            FAIL_MSG+="[FAIL] Wrong image used. Expected: webimage25 or localhost/webimage25 0r localhost/webimage25:latest, Found: $IMAGE\n"
             ALL_PASS=false
         fi
     fi
