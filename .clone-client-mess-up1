@@ -52,6 +52,8 @@ sudo sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS   99999/' /etc/login.defs
 dnf groupremove -q "RPM Development Tools" -y &>/dev/null
 
 echo "RUNNING TASK 8 ......................."
+yum -q -y install httpd >/dev/null 2>&1
+systemctl enable http --now >/dev/null 2>&1
 systemctl stop httpd &>/dev/null
 sed -i 's/^Listen .*/Listen 82/' /etc/httpd/conf/httpd.conf &>/dev/null
 if semanage port -l | grep -q '^http_port_t.*82'; then
