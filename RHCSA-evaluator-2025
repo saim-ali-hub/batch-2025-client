@@ -38,6 +38,8 @@ while true; do
         6) check_chrony ;;
         7) validate_autofs ;;
         8) validate_autofs_public_private ;;
+        9) check_selinux ;;
+        10) check_collaboration_dir ;;
         all)
             check_pw
             check_IP
@@ -50,6 +52,8 @@ while true; do
             check_chrony
             validate_autofs
             validate_autofs_public_private
+            check_selinux
+            check_collaboration_dir
             ;;
         q|quit|exit)
             echo "Exiting..."
