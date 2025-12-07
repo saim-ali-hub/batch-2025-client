@@ -366,12 +366,6 @@ validate_autofs_public_private() {
     else
         echo -e "\e[31mAutofs_Mount_Check: Fail\e[0m"
     fi
-    # --- Autounmount Feedback (not counted in Pass/Fail) ---
-    if [[ $pub_unmount -ne 0 && $priv_unmount -ne 0 ]]; then
-        echo -e "\e[32mAuto_Unmount: Working\e[0m"
-    else
-        echo -e "\e[33mAuto_Unmount: Not yet unmounted (may need more idle time)\e[0m"
-    fi
 }
 ######################################################################################
 
