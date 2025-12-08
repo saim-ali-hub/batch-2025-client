@@ -13,6 +13,8 @@ echo -e "\n\e[37m***********************RUNNING NOW*****************************
     - check pdf file conversion     --DONE
     - check repos			        --DONE
     - check chrony			        --DONE
+    - check selinux                 --DONE
+    - check collaboration directory --DONE
   '
 if [ `id -u` != 0 ];then
         echo ""
@@ -449,7 +451,7 @@ check_collaboration_dir() {
         echo -e "\e[31m[4] SGID bit: FAIL\e[0m"
 
     # Step 5: Sticky bit
-    stat -c "%A" "$dir" | grep -q "t" &&
+    stat -c "%A" "$dir" | grep -q "T" &&
         echo -e "\e[32m[5] Sticky bit: PASS\e[0m" && r5="PASS" ||
         echo -e "\e[31m[5] Sticky bit: FAIL\e[0m"
 
