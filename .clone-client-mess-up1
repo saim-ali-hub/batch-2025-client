@@ -33,10 +33,10 @@ shutdown -r now
 }
 changing_other_configurations(){
 echo "RUNNING TASK 4 ......................."
-yum -y remove nfs-utils autofs > /dev/null 2>&1
+yum -y remove nfs-utils autofs >/dev/null 2>&1
 
 echo "RUNNING TASK 5 ......................."
-userdel -r user1
+userdel -r user1 >/dev/null 2>&1
 
 echo "RUNNING TASK 6 ......................."
 groupdel developers  >/dev/null 2>&1
@@ -52,15 +52,18 @@ sudo sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS   99999/' /etc/login.defs    >/dev
 dnf groupremove -q "RPM Development Tools" -y &>/dev/null
 
 echo "RUNNING TASK 8 ......................."
-yum -q -y install httpd >/dev/null 2>&1
-systemctl enable http --now >/dev/null 2>&1
-systemctl stop httpd &>/dev/null
+yum -q -y install httpd &>/dev/null && \
+systemctl enable httpd --now &>/dev/null && \
+systemctl stop httpd &>/dev/null && \
 sed -i 's/^Listen .*/Listen 82/' /etc/httpd/conf/httpd.conf &>/dev/null
+
 if semanage port -l | grep -q '^http_port_t.*82'; then
     semanage port -d -t http_port_t -p tcp 82 &>/dev/null
 fi
+
 firewall-cmd --remove-port=82/tcp --permanent &>/dev/null
 firewall-cmd --reload &>/dev/null
+
 
 echo "RUNNING TASK 9 ......................."
 rm -rf /web1 &>/dev/null
