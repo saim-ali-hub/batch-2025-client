@@ -40,6 +40,19 @@ while true; do
         8) validate_autofs_public_private ;;
         9) check_selinux ;;
         10) check_collaboration_dir ;;
+        11) 
+            check_group
+            check_users
+            check_grp_membership
+            check_usr_shell
+            check_sudo
+            check_umask
+            ;;
+        12) 
+            check_enforce_password
+            check_account_expiry
+            ;;
+        13) check_max_days ;;
         all)
             check_pw
             check_IP
@@ -54,6 +67,15 @@ while true; do
             validate_autofs_public_private
             check_selinux
             check_collaboration_dir
+             check_group
+            check_users
+            check_grp_membership
+            check_usr_shell
+            check_sudo
+            check_umask
+            check_enforce_password
+            check_account_expiry
+            check_max_days
             ;;
         q|quit|exit)
             echo "Exiting..."
