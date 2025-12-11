@@ -599,5 +599,18 @@ check_max_days(){
         echo -e "\e[31mmax_days: Fail\e[0m\n"
    fi
 }
-######################################################################################################:
+######################################################################################################
+check_group_pkg() {
+    echo "Q14: Check Group Software Install ......"
+    dnf grouplist --installed | grep -w "RPM Development Tools" &>/dev/null
+    pk_e=$?
+
+    if [ $pk_e -eq 0 ]; then
+        echo -e "\e[32mgroup_package_install: Pass\e[0m\n"
+    else
+        echo -e "\e[31mgroup_package_install: Fail\e[0m\n"
+    fi
+}
+######################################################################################################
+
 
