@@ -53,6 +53,7 @@ while true; do
             check_account_expiry
             ;;
         13) check_max_days ;;
+        14) check_group_pkg ;;
         all)
             check_pw
             check_IP
@@ -76,6 +77,7 @@ while true; do
             check_enforce_password
             check_account_expiry
             check_max_days
+            check_group_pkg
             ;;
         q|quit|exit)
             echo "Exiting..."
