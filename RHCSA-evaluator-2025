@@ -54,6 +54,11 @@ while true; do
             ;;
         13) check_max_days ;;
         14) check_group_pkg ;;
+        15) check_tuned_profile ;;
+        16)
+            check_cron
+            check_natasha_cron_blocked
+            ;;
         all)
             check_pw
             check_IP
@@ -78,6 +83,9 @@ while true; do
             check_account_expiry
             check_max_days
             check_group_pkg
+            check_tuned_profile
+            check_cron
+            check_natasha_cron_blocked
             ;;
         q|quit|exit)
             echo "Exiting..."
