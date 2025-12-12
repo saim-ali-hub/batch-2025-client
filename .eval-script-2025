@@ -612,11 +612,15 @@ check_group_pkg() {
     fi
 }
 ######################################################################################################
-check_tuned_profile(){
+check_tuned_profile() {
   echo "Q15: Checking tuned profile..."
-  systemctl restart tuned &>/dev/null
-  recommended_profile=$(tuned-adm recommend)
-  current_profile=$(tuned-adm active | awk -F': ' '{print $2}' | xargs)
+
+  recommended_profile=$(tuned-adm recommend | xargs)
+  current_profile=$(tuned-adm active 2>/dev/null | \
+                    grep -oP '(?<=profile: ).*' | xargs)
+
+  # Handle case with no active profile
+  [ -z "$current_profile" ] && current_profile="none"
 
   if [ "$current_profile" == "$recommended_profile" ]; then
     echo -e "\e[32mtuned_profile: PASS\e[0m\n"
