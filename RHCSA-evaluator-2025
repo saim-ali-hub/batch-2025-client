@@ -59,6 +59,16 @@ while true; do
             check_cron
             check_natasha_cron_blocked
             ;;
+        17) check_journal ;; 
+        18) check_bzip2_compression ;;
+        19) check_lv1_create_extend ;;
+        20) check_lv2_extents ;;
+        21) check_swap ;;
+        22) check_lv3_shrink ;;
+        23)
+             check_perm_ACL_fstab 
+             check_directory_ACL           
+             ;;
         all)
             check_pw
             check_IP
@@ -86,6 +96,14 @@ while true; do
             check_tuned_profile
             check_cron
             check_natasha_cron_blocked
+            check_journal
+            check_bzip2_compression
+            check_lv1_create_extend
+            check_lv2_extents
+            check_swap
+            check_lv3_shrink
+            check_perm_ACL_fstab 
+            check_directory_ACL           
             ;;
         q|quit|exit)
             echo "Exiting..."
