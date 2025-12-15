@@ -15,6 +15,14 @@ echo -e "\n\e[37m***********************RUNNING NOW*****************************
     - check chrony			        --DONE
     - check selinux                 --DONE
     - check collaboration directory --DONE
+    - check_journal					--DONE
+    - check_bzip2_compression 		--DONE
+    - check_lv1_create_extend 		--DONE
+    - check_lv2_extents 			--DONE
+    - check_swap 					--DONE
+    - check_lv3_shrink 				--DONE
+    - check_perm_ACL_fstab 			--DONE
+    - check_directory_ACL  			--DONE       
   '
 if [ `id -u` != 0 ];then
         echo ""
