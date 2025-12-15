@@ -652,4 +652,218 @@ check_natasha_cron_blocked(){
   fi
 }
 ################################################################################
+check_journal(){
+  echo "Q17: Checking persistent journal..."
+  journal_dir="/var/log/journal"
+
+  if [ -d "$journal_dir" ] && [ "$(ls -A "$journal_dir")" ]; then
+    echo -e "\e[32mpersistent_journal: PASS\e[0m\n"
+  else
+    echo -e "\e[31mpersistent_journal: FAIL\e[0m\n"
+  fi
+}
+################################################################################
+check_bzip2_compression(){
+  echo "Q18: Checking bzip2 compression..."
+  file_n="/tmp/archive.tar"
+
+  if file "$file_n" | grep -q "bzip2 compressed data"; then
+    echo -e "\e[32mbzip2_compression: PASS\e[0m\n"
+  else
+    echo -e "\e[31mbzip2_compression: FAIL\e[0m\n"
+  fi
+}
+################################################################################
+check_lv1_create_extend() {
+    echo "Checking Q19: LVM Create & Extend (/app1) ......."
+
+    mp="/app1"
+    vg="vg1"
+    lv="lv1"
+
+    mount | grep -q " $mp "
+    mp_st=$?
+
+    if [ $mp_st -ne 0 ]; then
+        echo -e "\e[31mQ19: Mount point $mp not found → Fail\e[0m\n"
+        return
+    fi
+
+    vgs | grep -w "$vg" >/dev/null 2>&1 || {
+        echo -e "\e[31mQ19: VG $vg missing → Fail\e[0m\n"
+        return
+    }
+
+    lvs | grep -w "$lv" >/dev/null 2>&1 || {
+        echo -e "\e[31mQ19: LV $lv missing → Fail\e[0m\n"
+        return
+    }
+
+    fs_size=$(df -m "$mp" | awk 'NR==2 {print $2}')
+
+    if [ "$fs_size" -ge 450 ] && [ "$fs_size" -le 500 ]; then
+        echo -e "\e[32mQ19: Filesystem size ${fs_size}M → Pass\e[0m\n"
+    else
+        echo -e "\e[31mQ19: Filesystem size ${fs_size}M → Fail\e[0m\n"
+    fi
+}
+################################################################################
+check_lv2_extents() {
+    echo "Checking Q20: LVM with Specific Extents (/app2) ......."
+
+    vg="vg2"
+    lv="lv2"
+    mp="/app2"
+    req_pe=8
+    req_le=50
+
+    vgs | grep -w "$vg" >/dev/null 2>&1 || {
+        echo -e "\e[31mQ20: VG $vg missing → Fail\e[0m\n"
+        return
+    }
+
+    pe_size=$(vgdisplay "$vg" | awk '/PE Size/ {print int($3)}')
+    if [ "$pe_size" -eq "$req_pe" ]; then
+        echo -e "\e[32mQ20 Task1: PE Size = ${pe_size}MiB → Pass\e[0m"
+    else
+        echo -e "\e[31mQ20 Task1: PE Size = ${pe_size}MiB → Fail\e[0m"
+    fi
+
+    le_count=$(lvdisplay /dev/$vg/$lv 2>/dev/null | awk '/Current LE/ {print $3}')
+    if [ "$le_count" -eq "$req_le" ]; then
+        echo -e "\e[32mQ20 Task2: LE Count = ${le_count} → Pass\e[0m"
+    else
+        echo -e "\e[31mQ20 Task2: LE Count = ${le_count} → Fail\e[0m"
+    fi
+
+    mount | grep -q " $mp "
+    if [ $? -eq 0 ]; then
+        echo -e "\e[32mQ20 Task3: Mounted on $mp → Pass\e[0m\n"
+    else
+        echo -e "\e[31mQ20 Task3: Mount missing → Fail\e[0m\n"
+    fi
+}
+################################################################################
+check_swap() {
+    echo "Checking Q21: Swap Configuration ......."
+
+    swapon --show | grep -q "/dev/sdc1"
+    swp_st=$?
+
+    if [ $swp_st -ne 0 ]; then
+        echo -e "\e[31mQ21: Swap device /dev/sdc1 not active → Fail\e[0m\n"
+        return
+    fi
+
+    swap_size=$(lsblk -b /dev/sdc1 | awk 'NR==2 {print int($4/1024/1024)}')
+
+    if [ "$swap_size" -ge 500 ] && [ "$swap_size" -le 520 ]; then
+        echo -e "\e[32mQ21: Swap size ${swap_size}MB → Pass\e[0m"
+    else
+        echo -e "\e[31mQ21: Swap size ${swap_size}MB → Fail\e[0m"
+    fi
+
+    grep -q "/dev/sdc1" /etc/fstab
+    if [ $? -eq 0 ]; then
+        echo -e "\e[32mQ21: Persistent swap entry → Pass\e[0m\n"
+    else
+        echo -e "\e[31mQ21: Missing fstab entry → Fail\e[0m\n"
+    fi
+}
+################################################################################
+check_lv3_shrink() {
+    echo "Checking Q22: LVM Shrink (/app3) ......."
+
+    mp="/app3"
+    vg="vg3"
+    lv="lv3"
+
+    mount | grep -q " $mp "
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31mQ22: Mount $mp missing → Fail\e[0m\n"
+        return
+    fi
+
+    fs_size=$(df -m "$mp" | awk 'NR==2 {print $2}')
+
+    if [ "$fs_size" -ge 250 ] && [ "$fs_size" -le 300 ]; then
+        echo -e "\e[32mQ22: Filesystem size ${fs_size}M → Pass\e[0m\n"
+    else
+        echo -e "\e[31mQ22: Filesystem size ${fs_size}M → Fail\e[0m\n"
+    fi
+}
+################################################################################
+check_perm_ACL_fstab() {
+    echo "Checking Q23.a: Permissions and ACL on /var/tmp/fstab ......"
+
+    file="/var/tmp/fstab"
+
+    [ -f "$file" ] || {
+        echo -e "\e[31mQ23.a: File $file not found → Fail\e[0m\n"
+        return
+    }
+
+    owner=$(stat -c %U "$file")
+    group=$(stat -c %G "$file")
+    perms=$(stat -c %A "$file")
+
+    # Owner check
+    [ "$owner" = "root" ] && \
+        echo -e "\e[32mOwner root → Pass\e[0m" || \
+        echo -e "\e[31mOwner $owner → Fail\e[0m"
+
+    # Group check
+    [ "$group" = "root" ] && \
+        echo -e "\e[32mGroup root → Pass\e[0m" || \
+        echo -e "\e[31mGroup $group → Fail\e[0m"
+
+    # Executable check
+    echo "$perms" | grep -q 'x' && \
+        echo -e "\e[31mExecutable permission found → Fail\e[0m" || \
+        echo -e "\e[32mNot executable → Pass\e[0m"
+
+    getfacl /var/tmp/fstab | grep '^user:natasha:rw-' &>/dev/null
+    st1=$?
+
+    getfacl /var/tmp/fstab | grep '^user:harry:---' &>/dev/null
+    st2=$?
+    
+    getfacl /var/tmp/fstab | grep '^other::r--' &>/dev/null
+    st3=$?
+
+    if [ $st1 -eq 0 ] && [ $st2 -eq 0 ] && [ $st3 -eq 0 ]; then
+        echo -e "\e[32mCheck Q23a: Pass\e[0m\n"
+    else
+        echo -e "\e[31mCheck Q23a: Fail\e[0m\n"
+    fi
+}
+################################################################################
+check_directory_ACL() {
+    echo "Checking Q23.b: Directory ACL on /tmp/data2 ......"
+
+    dir="/tmp/data2"
+
+    [ -d "$dir" ] || {
+        echo -e "\e[31mQ23.b: Directory $dir not found → Fail\e[0m\n"
+        return
+    }
+
+    owner=$(stat -c %U "$dir")
+
+    [ "$owner" = "linda" ] && \
+        echo -e "\e[32mOwner linda → Pass\e[0m" || \
+        echo -e "\e[31mOwner $owner → Fail\e[0m"
+
+    # Bob rw access via ACL
+    getfacl "$dir" | grep -q "^user:bob:rw" && \
+        echo -e "\e[32mACL bob rw → Pass\e[0m" || \
+        echo -e "\e[31mACL bob rw → Fail\e[0m"
+
+    # Others no access
+    other_perm=$(stat -c %a "$dir" | cut -c3)
+    [ "$other_perm" = "0" ] && \
+        echo -e "\e[32mOthers no access → Pass\e[0m\n" || \
+        echo -e "\e[31mOthers permission incorrect → Fail\e[0m\n"
+}
+################################################################################
 
