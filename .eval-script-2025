@@ -830,13 +830,13 @@ check_perm_ACL_fstab() {
         echo -e "\e[31mExecutable permission found → Fail\e[0m" || \
         echo -e "\e[32mNot executable → Pass\e[0m"
 
-    getfacl /var/tmp/fstab | grep '^user:natasha:rw-' &>/dev/null
+    getfacl -p /var/tmp/fstab 2>/dev/null | grep '^user:natasha:rw-' &>/dev/null
     st1=$?
 
-    getfacl /var/tmp/fstab | grep '^user:harry:---' &>/dev/null
+    getfacl -p /var/tmp/fstab 2>/dev/null | grep '^user:harry:---' &>/dev/null
     st2=$?
     
-    getfacl /var/tmp/fstab | grep '^other::r--' &>/dev/null
+    getfacl -p /var/tmp/fstab 2>/dev/null | grep '^other::r--' &>/dev/null
     st3=$?
 
     if [ $st1 -eq 0 ] && [ $st2 -eq 0 ] && [ $st3 -eq 0 ]; then
@@ -863,7 +863,7 @@ check_directory_ACL() {
         echo -e "\e[31mOwner $owner → Fail\e[0m"
 
     # Bob rw access via ACL
-    getfacl "$dir" | grep -q "^user:bob:rw" && \
+    getfacl -p "$dir" 2>/dev/null | grep -q "^user:bob:rwx" && \
         echo -e "\e[32mACL bob rw → Pass\e[0m" || \
         echo -e "\e[31mACL bob rw → Fail\e[0m"
 
