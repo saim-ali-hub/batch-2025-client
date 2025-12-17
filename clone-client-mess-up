@@ -1,39 +1,52 @@
 #!/bin/bash
 
-# Check root
-if [ "$(id -u)" != "0" ]; then
+# Root check
+if [ "$(id -u)" -ne 0 ]; then
     echo "Please run as root"
     exit 1
 fi
 
-if [ -e ".clone-client-mess-up1" ]; then
+# Move script if present locally
+if [ -f ".clone-client-mess-up1" ]; then
     mv -f .clone-client-mess-up1 /usr/share/.clone-client-mess-up1 2>/dev/null
 fi
 
-# Ensure the eval script exists and can be sourced
+# Verify script exists
 if [ ! -f /usr/share/.clone-client-mess-up1 ]; then
-    echo "Error: .clone-client-mess-up1 file not found!"
+    echo "Error: /usr/share/.clone-client-mess-up1 not found"
     exit 1
 fi
 
-if ! source /usr/share/.clone-client-mess-up1 2>/dev/null; then
-    echo "Error: Cannot source .clone-client-mess-up1 file"
-    exit 1
-fi
+# Source the script SAFELY
+set +e
+source /usr/share/.clone-client-mess-up1 2>/dev/null
+set +e
 
-echo "select 1 for change_rootpw_repos_chrony or select 2 for changing_other_configurations"
+# Menu loop
+echo "Select an option:"
+echo "1) changing_rootpw_repos_chrony"
+echo "2) changing_other_configurations"
+echo "q) Quit"
+
 while true; do
-    read -p "Please select code (1, 2 or q to quit): " code
-    code=$(echo "$code" | tr '[:upper:]' '[:lower:]')
+    read -p "Enter choice (1, 2, q): " code
     echo ""
 
     case "$code" in
-        1) changing_rootpw_repos_chrony ;;
-        2) changing_other_configurations ;;
-        q)     
+        1)
+            changing_rootpw_repos_chrony
+            read -p "Reboot system now? (y/n): " ans
+            [[ "$ans" == "y" ]] && shutdown -r now
+            ;;
+        2)
+            changing_other_configurations
+            ;;
+        q|Q)
             echo "Exiting... Goodbye!"
             exit 0
             ;;
-        *) echo "You did not select a valid code number." ;;
+        *)
+            echo "Invalid option. Try again."
+            ;;
     esac
 done
