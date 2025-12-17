@@ -9,12 +9,29 @@ echo -e "\n\e[37m***********************RUNNING NOW*****************************
     - check webimage25		        --DONE
     - check_webimage                --DONE
     - check web container1	     	--DONE
+    - check_container25				--DONE
     - check myweb                   --DONE
     - check pdf file conversion     --DONE
     - check repos			        --DONE
     - check chrony			        --DONE
+    - validate_autofs				--DONE
+    - validate_autofs_public_private --DONE
     - check selinux                 --DONE
     - check collaboration directory --DONE
+    - check_group					--DONE
+    - check_users					--DONE
+    - check_grp_membership			--DONE
+    - check_usr_shell				--DONE
+    - check_sudo					--DONE
+    - check_umask					--DONE
+    - check_natasha_permissions		--DONE
+    - check_enforce_password		--DONE
+    - check_account_expiry			--DONE
+    - check_max_days				--DONE
+    - check_group_pkg				--DONE
+    - check_tuned_profile			--DONE
+    - check_cron					--DONE
+    - check_natasha_cron_blocked	--DONE
     - check_journal					--DONE
     - check_bzip2_compression 		--DONE
     - check_lv1_create_extend 		--DONE
@@ -22,7 +39,9 @@ echo -e "\n\e[37m***********************RUNNING NOW*****************************
     - check_swap 					--DONE
     - check_lv3_shrink 				--DONE
     - check_perm_ACL_fstab 			--DONE
-    - check_directory_ACL  			--DONE       
+    - check_directory_ACL  			--DONE
+    - validate_find					--DONE
+    - validate_grep					--DONE
   '
 if [ `id -u` != 0 ];then
         echo ""
