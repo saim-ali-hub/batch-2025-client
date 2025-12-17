@@ -928,71 +928,81 @@ validate_find() {
     echo "Q24: Validating Find tasks ......"
 
     # i) Files newer than 5 days
-    if [ -s /tmp/file-logs ]; then
-        echo "24(a)i: PASS"
+    if [ -s /tmp/file-logs ] && find /var/log -type f -mtime -5 | grep -q "$(head -n1 /tmp/file-logs | awk '{print $NF}')"; then
+        echo "24(i): PASS"
     else
-        echo "24(a)i: FAIL"
+        echo "24(i): FAIL"
     fi
 
     # ii) Files 1MB-2MB copied
-    if [ -d /backup/logfiles ] && [ "$(ls -A /backup/logfiles 2>/dev/null)" ]; then
-        echo "24(a)ii: PASS"
+    copied_files=$(ls -l /backup/logfiles 2>/dev/null)
+    if [ -n "$copied_files" ] && find /var/log -type f -size +1M -size -2M | grep -q "$(ls -1 /backup/logfiles | head -n1)"; then
+        echo "24(ii): PASS"
     else
-        echo "24(a)ii: FAIL"
+        echo "24(ii): FAIL"
     fi
 
     # iii) Directories owned by linda copied
-    if [ -d /var/tmp/linda ] && [ "$(ls -A /var/tmp/linda 2>/dev/null)" ]; then
-        echo "24(a)iii: PASS"
+    if [ -d /var/tmp/linda ] && find /opt -type d -user linda | grep -q "$(ls -1 /var/tmp/linda | head -n1)"; then
+        echo "24(iii): PASS"
     else
-        echo "24(a)iii: FAIL"
+        echo "24(iii): FAIL"
     fi
 
     # iv) Setgid files list
-    if [ -s /tmp/setgid_files ]; then
-        echo "24(a)iv: PASS"
+    if [ -s /tmp/setgid_files ] && grep -q "s" /tmp/setgid_files; then
+        echo "24(iv): PASS"
     else
-        echo "24(a)iv: FAIL"
+        echo "24(iv): FAIL"
     fi
 
     # v) Program 'myprogram' existence
     if [ -f /tmp/myprogram ]; then
-        echo "24(a)v: PASS"
+        # Optional: check if program contains a find command for group 'developers'
+        if grep -q "developers" /tmp/myprogram; then
+            echo "24(v): PASS"
+        else
+            echo "24(v): FAIL (missing find for developers)"
+        fi
     else
-        echo "24(a)v: FAIL"
+        echo "24(v): FAIL"
     fi
 
-    # vi) /tmp/myscript existence
+    # vi) /tmp/myscript execution
     if [ -f /tmp/myscript ]; then
-        echo "24(a)vi: PASS"
+        output=$(sudo -u natasha bash -c "/tmp/myscript")
+        if [ "$output" = "Hello Learners" ]; then
+            echo "24(vi): PASS"
+        else
+            echo "24(vi): FAIL"
+        fi
     else
-        echo "24(a)vi: FAIL"
+        echo "24(vi): FAIL"
     fi
 }
-###########################################################################################
+#################################################################################################
 validate_grep() {
-    echo "Q25: Validating Grep tasks ......."
+    echo "Q25: Validating Grep tasks ......"
 
-    # i) /tmp/new_file exists
-    if [ -s /tmp/new_file ]; then
-        echo "25(b)i: PASS"
+    # i) Check empty lines removed, line numbers present
+    if [ -s /tmp/new_file ] && ! grep -q '^$' /tmp/new_file && grep -q '^[0-9]\+:' /tmp/new_file; then
+        echo "25(i): PASS"
     else
-        echo "25(b)i: FAIL"
+        echo "25(i): FAIL"
     fi
 
-    # ii) /tmp/ssh-data exists
-    if [ -s /tmp/ssh-data ]; then
-        echo "25(b)ii: PASS"
+    # ii) Exclude commented and empty lines
+    if [ -s /tmp/ssh-data ] && ! grep -q '^#' /tmp/ssh-data && ! grep -q '^$' /tmp/ssh-data; then
+        echo "25(ii): PASS"
     else
-        echo "25(b)ii: FAIL"
+        echo "25(ii): FAIL"
     fi
 
-    # iii) /tmp/log_msg exists
-    if [ -s /tmp/log_msg ]; then
-        echo "25(b)iii: PASS"
+    # iii) Check log string exists
+    if [ -s /tmp/log_msg ] && grep -q "I am preparing RHCSA9 Exam" /tmp/log_msg; then
+        echo "25(iii): PASS"
     else
-        echo "25(b)iii: FAIL"
+        echo "25(iii): FAIL"
     fi
 }
-###########################################################################################
-
+###################################################################################################
