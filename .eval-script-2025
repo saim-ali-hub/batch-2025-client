@@ -929,7 +929,7 @@ validate_find() {
 
     # i) Files newer than 5 days
     if [ -s /tmp/file-logs ] && find /var/log -type f -mtime -5 | grep -q "$(head -n1 /tmp/file-logs | awk '{print $NF}')"; then
-        echo -e "\e[31m24(i): → PASS\e[0m\n"
+        echo -e "\e[32m24(i): → PASS\e[0m\n"
     else
         echo -e "\e[31m24(i) → Fail\e[0m\n"
     fi
@@ -937,21 +937,21 @@ validate_find() {
     # ii) Files 1MB-2MB copied
     copied_files=$(ls -l /backup/logfiles 2>/dev/null)
     if [ -n "$copied_files" ] && find /var/log -type f -size +1M -size -2M | grep -q "$(ls -1 /backup/logfiles | head -n1)"; then
-        echo -e "\e[31m24(ii): → PASS\e[0m\n"
+        echo -e "\e[32m24(ii): → PASS\e[0m\n"
     else
         echo -e "\e[31m24(ii) → Fail\e[0m\n"
     fi
 
     # iii) Directories owned by linda copied
     if [ -d /var/tmp/linda ] && find /opt -type d -user linda | grep -q "$(ls -1 /var/tmp/linda | head -n1)"; then
-        echo -e "\e[31m24(iii): → PASS\e[0m\n"
+        echo -e "\e[32m24(iii): → PASS\e[0m\n"
     else
         echo -e "\e[31m24(iii) → Fail\e[0m\n"
     fi
 
     # iv) Setgid files list
     if [ -s /tmp/setgid_files ] && grep -q "s" /tmp/setgid_files; then
-        echo -e "\e[31m24(iv): → PASS\e[0m\n"
+        echo -e "\e[32m24(iv): → PASS\e[0m\n"
     else
         echo -e "\e[31m24(iv) → Fail\e[0m\n"
     fi
@@ -960,7 +960,7 @@ validate_find() {
     if [ -f /tmp/myprogram ]; then
         # Optional: check if program contains a find command for group 'developers'
         if grep -q "developers" /tmp/myprogram; then
-            echo -e "\e[31m24(v): → PASS\e[0m\n"
+            echo -e "\e[32m24(v): → PASS\e[0m\n"
         else
             echo -e "\e[31m24(v): FAIL (missing find for developers)\e[0m\n"
         fi
@@ -972,7 +972,7 @@ validate_find() {
     if [ -f /tmp/myscript ]; then
         output=$(sudo -u natasha bash -c "/tmp/myscript")
         if [ "$output" = "Hello Learners" ]; then
-            echo -e "\e[31m24(vi): → PASS\e[0m\n"
+            echo -e "\e[32m24(vi): → PASS\e[0m\n"
         else
             echo -e "\e[31m24(vi) → Fail\e[0m\n"
         fi
@@ -986,21 +986,21 @@ validate_grep() {
 
     # i) Check empty lines removed, line numbers present
     if [ -s /tmp/new_file ] && ! grep -q '^$' /tmp/new_file && grep -q '^[0-9]\+:' /tmp/new_file; then
-        echo -e "\e[31m25(i): → PASS\e[0m\n"
+        echo -e "\e[32m25(i): → PASS\e[0m\n"
     else
         echo -e "\e[31m25(i) → Fail\e[0m\n"
     fi
 
     # ii) Exclude commented and empty lines
     if [ -s /tmp/ssh-data ] && ! grep -q '^#' /tmp/ssh-data && ! grep -q '^$' /tmp/ssh-data; then
-        echo -e "\e[31m25(ii): → PASS\e[0m\n"
+        echo -e "\e[32m25(ii): → PASS\e[0m\n"
     else
         echo -e "\e[31m25(ii) → Fail\e[0m\n"
     fi
 
     # iii) Check log string exists
     if [ -s /tmp/log_msg ] && grep -q "I am preparing RHCSA9 Exam" /tmp/log_msg; then
-        echo -e "\e[31m25(iii): → PASS\e[0m\n"
+        echo -e "\e[32m25(iii): → PASS\e[0m\n"
     else
         echo -e "\e[31m25(iii) → Fail\e[0m\n"
     fi
