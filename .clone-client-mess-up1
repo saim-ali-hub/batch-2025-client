@@ -1,127 +1,109 @@
 #!/bin/bash
 
-echo -e "\n\e[36mLINOOP TEK INNOVATIONS CONFGIURATION TOOL STARTING\nKEEP CALM AND SIT TIGHT\e[0m"
-echo -e "\n\e[37m***********************RUNNING NOW******************************\n\e[0m"
+set -e
 
-: ' This Script configures environemnt and make machine ready
-    - changing_rootpw_repos_chrony             --DONE
-    - changing_other_configurations     --DONE
-  '
+echo -e "\n\e[36mLINOOP TEK INNOVATIONS CONFIGURATION TOOL STARTING\e[0m"
+echo -e "\e[37m***********************RUNNING NOW******************************\e[0m\n"
 
-if [ `id -u` != 0 ];then
-        echo ""
-        echo -e "\e[31mFailed: Please Run this Script as root\e[0m\n"
-        exit 1
-fi
-#------------------------------------------------------------------------------------------------
+[[ $(id -u) -ne 0 ]] && { echo -e "\e[31mRun as root\e[0m"; exit 1; }
+
 changing_rootpw_repos_chrony() {
-echo "RUNNING TASK 1 ......................."
-rm -rf /etc/yum.repos.d/*.repo
-rm -rf /etc/yum.repos.d/*
+    echo "RUNNING TASK 1"
+    rm -f /etc/yum.repos.d/*.repo
 
-echo "RUNNING TASK 2 ......................."
-#Uninstall chrony and remove server line from /etc/chrony.conf
-sed -i '/^server[[:space:]]\+.*iburst/d' /etc/chrony.conf 2>/dev/null
-systemctl disable chronyd --now 2>/dev/null
-dnf remove -y chrony &>/dev/null
+    echo "RUNNING TASK 2"
+    sed -i '/^server.*iburst/d' /etc/chrony.conf 2>/dev/null
+    systemctl disable chronyd --now &>/dev/null
+    dnf remove -y chrony &>/dev/null
 
-echo "RUNNING TASK 3 ......................."
-echo "complex_abc_1245*abc!!!!!" | passwd --stdin root
-echo "REBOOTING YOUR SYSTEM"
-sleep 0
-shutdown -r now
-}
-changing_other_configurations(){
-echo "RUNNING TASK 4 ......................."
-yum -y remove nfs-utils autofs >/dev/null 2>&1
-
-echo "RUNNING TASK 5 ......................."
-userdel -r user1 >/dev/null 2>&1
-
-echo "RUNNING TASK 6 ......................."
-groupdel developers  >/dev/null 2>&1
-groupdel admins  >/dev/null 2>&1
-userdel -r max    >/dev/null 2>&1
-userdel -r bob    >/dev/null 2>&1
-userdel -r chris    >/dev/null 2>&1
-userdel -r natasha  >/dev/null 2>&1
-
-echo "RUNNING TASK 7 ......................."
-EDITOR="sed -i '/^%developers/d'" visudo    >/dev/null 2>&1
-sed -i '/^umask\b/d' /home/bob/.bashrc    >/dev/null 2>&1
-sed -i '/^umask\b/d' /home/natasha/.bashrc  >/dev/null 2>&1
-chage -d "" -E -1 max    >/dev/null 2>&1
-sudo sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS   99999/' /etc/login.defs    >/dev/null 2>&1
-dnf groupremove -q "RPM Development Tools" -y &>/dev/null
-
-echo "RUNNING TASK 8 ......................."
-yum -q -y install httpd &>/dev/null && \
-systemctl enable httpd --now &>/dev/null && \
-systemctl stop httpd &>/dev/null && \
-sed -i 's/^Listen .*/Listen 82/' /etc/httpd/conf/httpd.conf &>/dev/null
-
-if semanage port -l | grep -q '^http_port_t.*82'; then
-    semanage port -d -t http_port_t -p tcp 82 &>/dev/null
-fi
-
-firewall-cmd --remove-port=82/tcp --permanent &>/dev/null
-firewall-cmd --reload &>/dev/null
-
-
-echo "RUNNING TASK 9 ......................."
-rm -rf /web1 &>/dev/null
-mkdir -p /web1
-echo "I am enjoying RHCSA preparation" > /web1/index.html
-sed -i 's|^DocumentRoot .*|DocumentRoot "/web1"|' /etc/httpd/conf/httpd.conf &>/dev/null
-sed -i '0,/<Directory "\/var\/www">/s#<Directory "/var/www">#<Directory "/web1">#' /etc/httpd/conf/httpd.conf &>/dev/null
-systemctl restart httpd &>/dev/null
+    echo "RUNNING TASK 3"
+    echo 'root:complex_abc_1245*abc!!!!!' | chpasswd
 }
 
-echo "RUNNING TASK 10 ......................."
+changing_other_configurations() {
+    echo "RUNNING TASK 4"
+    yum remove -y nfs-utils autofs &>/dev/null
+
+    echo "RUNNING TASK 5"
+    for u in user1 max bob chris natasha; do
+        userdel -r "$u" &>/dev/null
+    done
+
+    for g in developers admins; do
+        groupdel "$g" &>/dev/null
+    done
+
+    sed -i '/^%developers/d' /etc/sudoers || true
+    visudo -c &>/dev/null || true
+
+    echo "RUNNING TASK 6"
+    yum install -y httpd &>/dev/null
+    systemctl enable httpd --now &>/dev/null || true
+    sed -i 's/^Listen .*/Listen 82/' /etc/httpd/conf/httpd.conf
+
+    semanage port -d -t http_port_t -p tcp 82 &>/dev/null || true
+    firewall-cmd --remove-port=82/tcp --permanent &>/dev/null || true
+    firewall-cmd --reload &>/dev/null || true
+
+    echo "RUNNING TASK 7"
+    mkdir -p /web1
+    echo "I am enjoying RHCSA preparation" > /web1/index.html
+    semanage fcontext -a -t httpd_sys_content_t "/web1(/.*)?"
+    restorecon -Rv /web1 &>/dev/null
+    systemctl restart httpd &>/dev/null
+    
+
+    
+    echo "RUNNING TASK 8 ......................."
+
 rm -rf /project >/dev/null 2>&1
-crontab -ru bob >/dev/null 2>&1
+
+crontab -u bob -r &>/dev/null || true
+
 sed -i '/^natasha$/d' /etc/cron.deny &>/dev/null
-rm -rf /var/log/journal  >/dev/null 2>&1
+
+rm -rf /var/log/journal >/dev/null 2>&1   # disable persistent journal
 rm -rf /tmp/archive.tar >/dev/null 2>&1
 rm -rf /var/tmp/fstab >/dev/null 2>&1
 rm -rf /tmp/data2 >/dev/null 2>&1
-rm -rf /tmp/file-logs	>/dev/null 2>&1
-rm -rf /backup/logfiles/	>/dev/null 2>&1
-rm -rf /var/tmp/linda/	>/dev/null 2>&1
-rm -rf /tmp/setgid_files	>/dev/null 2>&1
-rm -rf /usr/local/bin/myprogram	>/dev/null 2>&1
-rm -rf /tmp/new_dir/	>/dev/null 2>&1
-rm -rf /tmp/myscript	>/dev/null 2>&1
-rm -rf /tmp/new_file	>/dev/null 2>&1
-rm -rf /tmp/ssh-data	>/dev/null 2>&1
-rm -rf /tmp/log_msg	>/dev/null 2>&1
+rm -rf /tmp/file-logs >/dev/null 2>&1
+rm -rf /backup/logfiles >/dev/null 2>&1
+rm -rf /var/tmp/linda >/dev/null 2>&1
+rm -rf /tmp/setgid_files >/dev/null 2>&1
+rm -rf /usr/local/bin/myprogram >/dev/null 2>&1
+rm -rf /tmp/new_dir >/dev/null 2>&1
+rm -rf /tmp/myscript >/dev/null 2>&1
+rm -rf /tmp/new_file >/dev/null 2>&1
+rm -rf /tmp/ssh-data >/dev/null 2>&1
+rm -rf /tmp/log_msg >/dev/null 2>&1
 
-echo "RUNNING TASK 11 ......................."
+echo "RUNNING TASK 9 ......................."
+
 # Task 19 Cleanup (vg1/lv1)
-umount /app1 >/dev/null 2>&1
+mountpoint -q /app1 && umount /app1 >/dev/null 2>&1
 sed -i '\|/app1|d' /etc/fstab >/dev/null 2>&1
-lvremove -y /dev/vg1/lv1 >/dev/null 2>&1
-vgremove -y vg1 >/dev/null 2>&1
-pvremove -y /dev/sdb1 >/dev/null 2>&1
+lvdisplay /dev/vg1/lv1 &>/dev/null && lvremove -y /dev/vg1/lv1 >/dev/null 2>&1
+vgdisplay vg1 &>/dev/null && vgremove -y vg1 >/dev/null 2>&1
+pvdisplay /dev/sdb1 &>/dev/null && pvremove -y /dev/sdb1 >/dev/null 2>&1
 
 # Task 20 Cleanup (vg2/lv2)
-umount /app2 >/dev/null 2>&1
+mountpoint -q /app2 && umount /app2 >/dev/null 2>&1
 sed -i '\|/app2|d' /etc/fstab >/dev/null 2>&1
-lvremove -y /dev/vg2/lv2 >/dev/null 2>&1
-vgremove -y vg2 >/dev/null 2>&1
-pvremove -y /dev/sdb2 >/dev/null 2>&1
+lvdisplay /dev/vg2/lv2 &>/dev/null && lvremove -y /dev/vg2/lv2 >/dev/null 2>&1
+vgdisplay vg2 &>/dev/null && vgremove -y vg2 >/dev/null 2>&1
+pvdisplay /dev/sdb2 &>/dev/null && pvremove -y /dev/sdb2 >/dev/null 2>&1
 
 # Task 21 Cleanup (Swap on /dev/sdc1)
-# Disable swap ONLY if active
 swapon --summary | grep -q "/dev/sdc1" && swapoff /dev/sdc1 >/dev/null 2>&1
 sed -i '\|/dev/sdc1|d' /etc/fstab >/dev/null 2>&1
 wipefs -a /dev/sdc1 >/dev/null 2>&1
 
 # Task 22 Cleanup (vg3/lv3)
-umount /app3 >/dev/null 2>&1
+mountpoint -q /app3 && umount /app3 >/dev/null 2>&1
 sed -i '\|/app3|d' /etc/fstab >/dev/null 2>&1
-lvremove -y /dev/vg3/lv3 >/dev/null 2>&1
-vgremove -y vg3 >/dev/null 2>&1
-pvremove -y /dev/sdc2 >/dev/null 2>&1
+lvdisplay /dev/vg3/lv3 &>/dev/null && lvremove -y /dev/vg3/lv3 >/dev/null 2>&1
+vgdisplay vg3 &>/dev/null && vgremove -y vg3 >/dev/null 2>&1
+pvdisplay /dev/sdc2 &>/dev/null && pvremove -y /dev/sdc2 >/dev/null 2>&1
 
+}
 
