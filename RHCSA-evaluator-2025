@@ -47,6 +47,7 @@ while true; do
             check_usr_shell
             check_sudo
             check_umask
+            check_natasha_permissions
             ;;
         12) 
             check_enforce_password
@@ -69,6 +70,8 @@ while true; do
              check_perm_ACL_fstab 
              check_directory_ACL           
              ;;
+        24) validate_find ;;
+        25) validate_grep ;;
         all)
             check_pw
             check_IP
@@ -89,6 +92,7 @@ while true; do
             check_usr_shell
             check_sudo
             check_umask
+            check_natasha_permissions
             check_enforce_password
             check_account_expiry
             check_max_days
@@ -103,7 +107,9 @@ while true; do
             check_swap
             check_lv3_shrink
             check_perm_ACL_fstab 
-            check_directory_ACL           
+            check_directory_ACL
+            validate_find
+            validate_grep
             ;;
         q|quit|exit)
             echo "Exiting..."
