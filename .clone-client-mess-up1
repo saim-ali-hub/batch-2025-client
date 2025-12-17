@@ -40,13 +40,16 @@ userdel -r user1 >/dev/null 2>&1
 
 echo "RUNNING TASK 6 ......................."
 groupdel developers  >/dev/null 2>&1
+groupdel admins  >/dev/null 2>&1
 userdel -r max    >/dev/null 2>&1
 userdel -r bob    >/dev/null 2>&1
 userdel -r chris    >/dev/null 2>&1
+userdel -r natasha  >/dev/null 2>&1
 
 echo "RUNNING TASK 7 ......................."
 EDITOR="sed -i '/^%developers/d'" visudo    >/dev/null 2>&1
 sed -i '/^umask\b/d' /home/bob/.bashrc    >/dev/null 2>&1
+sed -i '/^umask\b/d' /home/natasha/.bashrc  >/dev/null 2>&1
 chage -d "" -E -1 max    >/dev/null 2>&1
 sudo sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS   99999/' /etc/login.defs    >/dev/null 2>&1
 dnf groupremove -q "RPM Development Tools" -y &>/dev/null
@@ -73,3 +76,52 @@ sed -i 's|^DocumentRoot .*|DocumentRoot "/web1"|' /etc/httpd/conf/httpd.conf &>/
 sed -i '0,/<Directory "\/var\/www">/s#<Directory "/var/www">#<Directory "/web1">#' /etc/httpd/conf/httpd.conf &>/dev/null
 systemctl restart httpd &>/dev/null
 }
+
+echo "RUNNING TASK 10 ......................."
+rm -rf /project >/dev/null 2>&1
+crontab -ru bob >/dev/null 2>&1
+sed -i '/^natasha$/d' /etc/cron.deny &>/dev/null
+rm -rf /var/log/journal  >/dev/null 2>&1
+rm -rf /tmp/archive.tar >/dev/null 2>&1
+rm -rf /var/tmp/fstab >/dev/null 2>&1
+rm -rf /tmp/data2 >/dev/null 2>&1
+rm -rf /tmp/file-logs	>/dev/null 2>&1
+rm -rf /backup/logfiles/	>/dev/null 2>&1
+rm -rf /var/tmp/linda/	>/dev/null 2>&1
+rm -rf /tmp/setgid_files	>/dev/null 2>&1
+rm -rf /usr/local/bin/myprogram	>/dev/null 2>&1
+rm -rf /tmp/new_dir/	>/dev/null 2>&1
+rm -rf /tmp/myscript	>/dev/null 2>&1
+rm -rf /tmp/new_file	>/dev/null 2>&1
+rm -rf /tmp/ssh-data	>/dev/null 2>&1
+rm -rf /tmp/log_msg	>/dev/null 2>&1
+
+echo "RUNNING TASK 11 ......................."
+# Task 19 Cleanup (vg1/lv1)
+umount /app1 >/dev/null 2>&1
+sed -i '\|/app1|d' /etc/fstab >/dev/null 2>&1
+lvremove -y /dev/vg1/lv1 >/dev/null 2>&1
+vgremove -y vg1 >/dev/null 2>&1
+pvremove -y /dev/sdb1 >/dev/null 2>&1
+
+# Task 20 Cleanup (vg2/lv2)
+umount /app2 >/dev/null 2>&1
+sed -i '\|/app2|d' /etc/fstab >/dev/null 2>&1
+lvremove -y /dev/vg2/lv2 >/dev/null 2>&1
+vgremove -y vg2 >/dev/null 2>&1
+pvremove -y /dev/sdb2 >/dev/null 2>&1
+
+# Task 21 Cleanup (Swap on /dev/sdc1)
+# Disable swap ONLY if active
+swapon --summary | grep -q "/dev/sdc1" && swapoff /dev/sdc1 >/dev/null 2>&1
+sed -i '\|/dev/sdc1|d' /etc/fstab >/dev/null 2>&1
+wipefs -a /dev/sdc1 >/dev/null 2>&1
+
+# Task 22 Cleanup (vg3/lv3)
+umount /app3 >/dev/null 2>&1
+sed -i '\|/app3|d' /etc/fstab >/dev/null 2>&1
+lvremove -y /dev/vg3/lv3 >/dev/null 2>&1
+vgremove -y vg3 >/dev/null 2>&1
+pvremove -y /dev/sdc2 >/dev/null 2>&1
+
+
