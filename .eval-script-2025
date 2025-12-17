@@ -561,6 +561,37 @@ check_umask(){
            echo -e "\e[31mUMASK: Fail\e[0m\n"
    fi
 }
+check_natasha_permissions() {
+    echo "Check default permissions for user 'natasha'..."
+
+    tmp_dir="/tmp/natasha_test"
+    mkdir -p "$tmp_dir"
+    rm -rf "$tmp_dir"/*
+
+    # Create test file and directory as natasha
+    sudo -u natasha bash -c "
+        touch $tmp_dir/test_file
+        mkdir $tmp_dir/test_dir
+    "
+    # Check file permission
+    file_perm=$(stat -c "%a" "$tmp_dir/test_file" 2>/dev/null)
+    if [ "$file_perm" = "600" ]; then
+        echo -e "a) Default file permissions for natasha: \e[32mPASS\e[0m"
+    else
+        echo -e "a) Default file permissions for natasha: \e[31mFAIL\e[0m"
+    fi
+
+    # Check directory permission
+    dir_perm=$(stat -c "%a" "$tmp_dir/test_dir" 2>/dev/null)
+    if [ "$dir_perm" = "500" ]; then
+        echo -e "b) Default directory permissions for natasha: \e[32mPASS\e[0m"
+    else
+        echo -e "b) Default directory permissions for natasha: \e[31mFAIL\e[0m"
+    fi
+
+    # Clean up
+    rm -rf "$tmp_dir"
+}
 #####################################################################################
 
 check_enforce_password(){
@@ -874,4 +905,75 @@ check_directory_ACL() {
         echo -e "\e[31mOthers permission incorrect → Fail\e[0m\n"
 }
 ################################################################################
+validate_find() {
+    echo "Q24: Validating Find tasks ......"
+
+    # i) Files newer than 5 days
+    if [ -s /tmp/file-logs ]; then
+        echo "24(a)i: PASS"
+    else
+        echo "24(a)i: FAIL"
+    fi
+
+    # ii) Files 1MB-2MB copied
+    if [ -d /backup/logfiles ] && [ "$(ls -A /backup/logfiles 2>/dev/null)" ]; then
+        echo "24(a)ii: PASS"
+    else
+        echo "24(a)ii: FAIL"
+    fi
+
+    # iii) Directories owned by linda copied
+    if [ -d /var/tmp/linda ] && [ "$(ls -A /var/tmp/linda 2>/dev/null)" ]; then
+        echo "24(a)iii: PASS"
+    else
+        echo "24(a)iii: FAIL"
+    fi
+
+    # iv) Setgid files list
+    if [ -s /tmp/setgid_files ]; then
+        echo "24(a)iv: PASS"
+    else
+        echo "24(a)iv: FAIL"
+    fi
+
+    # v) Program 'myprogram' existence
+    if [ -f /tmp/myprogram ]; then
+        echo "24(a)v: PASS"
+    else
+        echo "24(a)v: FAIL"
+    fi
+
+    # vi) /tmp/myscript existence
+    if [ -f /tmp/myscript ]; then
+        echo "24(a)vi: PASS"
+    else
+        echo "24(a)vi: FAIL"
+    fi
+}
+###########################################################################################
+validate_grep() {
+    echo "Q25: Validating Grep tasks ......."
+
+    # i) /tmp/new_file exists
+    if [ -s /tmp/new_file ]; then
+        echo "25(b)i: PASS"
+    else
+        echo "25(b)i: FAIL"
+    fi
+
+    # ii) /tmp/ssh-data exists
+    if [ -s /tmp/ssh-data ]; then
+        echo "25(b)ii: PASS"
+    else
+        echo "25(b)ii: FAIL"
+    fi
+
+    # iii) /tmp/log_msg exists
+    if [ -s /tmp/log_msg ]; then
+        echo "25(b)iii: PASS"
+    else
+        echo "25(b)iii: FAIL"
+    fi
+}
+###########################################################################################
 
