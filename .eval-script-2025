@@ -957,9 +957,9 @@ validate_find() {
     fi
 
     # v) Program 'myprogram' existence
-    if [ -f /tmp/myprogram ]; then
+    if [ -f /usr/local/bin/myprogram ]; then
         # Optional: check if program contains a find command for group 'developers'
-        if grep -q "developers" /tmp/myprogram; then
+        if grep -q "developers" /usr/local/bin/myprogram; then
             echo -e "\e[32m24(v): → PASS\e[0m\n"
         else
             echo -e "\e[31m24(v): FAIL (missing find for developers)\e[0m\n"
