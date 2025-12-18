@@ -207,9 +207,9 @@ check_container25(){
 
     # FINAL RESULT
     if $ALL_PASS; then
-        echo "[PASS] container25 — All validations successful."
+        echo -e "\e[32mCheck Q4(b) Container25 — All validations successful: Pass\e[0m\n"
     else
-        echo -e "$FAIL_MSG"
+        echo -e echo -e "\e[32m$FAIL_MSG\e[0m\n"
     fi
 }
 ################################################################################
