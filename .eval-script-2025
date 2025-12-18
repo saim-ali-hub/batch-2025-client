@@ -207,9 +207,9 @@ check_container25(){
 
     # FINAL RESULT
     if $ALL_PASS; then
-        echo -e "\e[32mCheck Q4(b) Container25 — All validations successful: Pass\e[0m\n"
+        echo -e "\e[32mCheck Q4(a) Container25 — All validations successful: Pass\e[0m\n"
     else
-        echo -e echo -e "\e[32m$FAIL_MSG\e[0m\n"
+        echo -e echo -e "\e[32mQ4(a)$FAIL_MSG\e[0m\n"
     fi
 }
 ################################################################################
@@ -268,9 +268,9 @@ check_myweb(){
     fi
     # FINAL RESULT
     if $ALL_PASS; then
-        echo "[PASS] myweb — All validations successful."
+		echo -e "\e[32mCheck Q4(b) myweb — All validations successful: Pass\e[0m\n"
     else
-        echo -e "$FAIL_MSG"
+        echo -e echo -e "\e[32mQ4(b)$FAIL_MSG\e[0m\n"
     fi
 }
 
