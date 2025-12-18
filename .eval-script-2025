@@ -582,33 +582,20 @@ check_umask(){
 }
 check_natasha_permissions() {
     echo "Check default permissions for user 'natasha'..."
-
-    tmp_dir="/tmp/natasha_test"
-
-    sudo -u natasha bash -c "
-        source /home/natasha/.bashrc 2>/dev/null
-        umask
-        rm -rf $tmp_dir
-        mkdir $tmp_dir
-        touch $tmp_dir/test_file
-        mkdir $tmp_dir/test_dir
-    " >/dev/null 2>&1
-
-    file_perm=$(stat -c "%a" "$tmp_dir/test_file" 2>/dev/null)
-    dir_perm=$(stat -c "%a" "$tmp_dir/test_dir" 2>/dev/null)
-
-    if [ "$file_perm" = "600" ]; then
+	des_umask="0277"
+   	current_umask=`su - natasha -c 'umask'`
+    
+    if [ $des_umask = $current_umask ]; then
         echo -e "\e[32ma) Default file permissions for natasha: Pass\e[0m\n" 
     else
         echo -e "\e[31mb) Default file permissions for natasha: Fail\e[0m\n"
     fi
 
-    if [ "$dir_perm" = "500" ]; then
+    if [ $des_umask = $current_umask ]; then
         echo -e "\e[32mb) Default directory permissions for natasha: Pass\e[0m\n" 
     else
         echo -e "\e[31mb) Default directory permissions for natasha: Fail\e[0m\n"
     fi
-    rm -rf "$tmp_dir"
 }
 #####################################################################################
 
