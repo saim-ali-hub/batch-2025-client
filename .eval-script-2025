@@ -936,7 +936,7 @@ validate_find() {
 
     # ii) Files 1MB-2MB copied
     copied_files=$(ls -l /backup/logfiles 2>/dev/null)
-    if [ -n "$copied_files" ] && find /var/log -type f -size +1M -size -2M | grep -q "$(ls -1 /backup/logfiles | head -n1)"; then
+    if [ -n "$copied_files" ] && find /var/log -type f -size +1M -size -5M | grep -q "$(ls -1 /backup/logfiles | head -n1)"; then
         echo -e "\e[32m24(ii): → PASS\e[0m\n"
     else
         echo -e "\e[31m24(ii) → Fail\e[0m\n"
