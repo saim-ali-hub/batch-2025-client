@@ -585,30 +585,29 @@ check_natasha_permissions() {
 
     tmp_dir="/tmp/natasha_test"
 
-    # Create and clean directory as natasha
     sudo -u natasha bash -c "
+        source /home/natasha/.bashrc 2>/dev/null
+        umask
         rm -rf $tmp_dir
-        mkdir -p $tmp_dir
+        mkdir $tmp_dir
         touch $tmp_dir/test_file
         mkdir $tmp_dir/test_dir
-    "
+    " >/dev/null 2>&1
 
-    # Check file permission
     file_perm=$(stat -c "%a" "$tmp_dir/test_file" 2>/dev/null)
-    if [ "$file_perm" = "600" ]; then
-        echo -e "a) Default file permissions for natasha: \e[32mPASS\e[0m"
-    else
-        echo -e "a) Default file permissions for natasha: \e[31mFAIL\e[0m"
-    fi
-
-    # Check directory permission
     dir_perm=$(stat -c "%a" "$tmp_dir/test_dir" 2>/dev/null)
-    if [ "$dir_perm" = "500" ]; then
-        echo -e "b) Default directory permissions for natasha: \e[32mPASS\e[0m"
+
+    if [ "$file_perm" = "600" ]; then
+        echo -e "\e[32ma) Default file permissions for natasha: Pass\e[0m\n" 
     else
-        echo -e "b) Default directory permissions for natasha: \e[31mFAIL\e[0m"
+        echo -e "\e[31mb) Default file permissions for natasha: Fail\e[0m\n"
     fi
 
+    if [ "$dir_perm" = "500" ]; then
+        echo -e "\e[32mb) Default directory permissions for natasha: Pass\e[0m\n" 
+    else
+        echo -e "\e[31mb) Default directory permissions for natasha: Fail\e[0m\n"
+    fi
     rm -rf "$tmp_dir"
 }
 #####################################################################################
