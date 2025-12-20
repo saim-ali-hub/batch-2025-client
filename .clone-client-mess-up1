@@ -48,35 +48,32 @@ changing_other_configurations() {
     echo "RUNNING TASK 7"
     mkdir -p /web1
     echo "I am enjoying RHCSA preparation" > /web1/index.html
-    semanage fcontext -a -t httpd_sys_content_t "/web1(/.*)?"
-    restorecon -Rv /web1 &>/dev/null
+    cp /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak
+    sed -i 's|^DocumentRoot ".*"|DocumentRoot "/web1"|' /etc/httpd/conf/httpd.conf
+    sed -i 's|<Directory "/var/www">|<Directory "/web1">|' /etc/httpd/conf/httpd.conf
     systemctl restart httpd &>/dev/null
     
-
-    
     echo "RUNNING TASK 8 ......................."
+    rm -rf /project >/dev/null 2>&1
+    crontab -u bob -r &>/dev/null || true
+    sed -i '/^natasha$/d' /etc/cron.deny &>/dev/null
 
-rm -rf /project >/dev/null 2>&1
+    rm -rf /var/log/journal >/dev/null 2>&1   # disable persistent journal
+    rm -rf /tmp/archive.tar >/dev/null 2>&1
+    rm -rf /var/tmp/fstab >/dev/null 2>&1
+    rm -rf /tmp/data2 >/dev/null 2>&1
+    rm -rf /tmp/file-logs >/dev/null 2>&1
+    rm -rf /backup/logfiles >/dev/null 2>&1
+    rm -rf /var/tmp/linda >/dev/null 2>&1
+    rm -rf /tmp/setgid_files >/dev/null 2>&1
+    rm -rf /usr/local/bin/myprogram >/dev/null 2>&1
+    rm -rf /tmp/new_dir >/dev/null 2>&1
+    rm -rf /tmp/myscript >/dev/null 2>&1
+    rm -rf /tmp/new_file >/dev/null 2>&1
+    rm -rf /tmp/ssh-data >/dev/null 2>&1
+    rm -rf /tmp/log_msg >/dev/null 2>&1
+    }
 
-crontab -u bob -r &>/dev/null || true
-
-sed -i '/^natasha$/d' /etc/cron.deny &>/dev/null
-
-rm -rf /var/log/journal >/dev/null 2>&1   # disable persistent journal
-rm -rf /tmp/archive.tar >/dev/null 2>&1
-rm -rf /var/tmp/fstab >/dev/null 2>&1
-rm -rf /tmp/data2 >/dev/null 2>&1
-rm -rf /tmp/file-logs >/dev/null 2>&1
-rm -rf /backup/logfiles >/dev/null 2>&1
-rm -rf /var/tmp/linda >/dev/null 2>&1
-rm -rf /tmp/setgid_files >/dev/null 2>&1
-rm -rf /usr/local/bin/myprogram >/dev/null 2>&1
-rm -rf /tmp/new_dir >/dev/null 2>&1
-rm -rf /tmp/myscript >/dev/null 2>&1
-rm -rf /tmp/new_file >/dev/null 2>&1
-rm -rf /tmp/ssh-data >/dev/null 2>&1
-rm -rf /tmp/log_msg >/dev/null 2>&1
-}
 Configure_LVM() {
 echo "RUNNING TASK 9 ......................."
 
