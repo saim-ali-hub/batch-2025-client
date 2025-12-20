@@ -26,6 +26,7 @@ set +e
 echo "Select an option:"
 echo "1) changing_rootpw_repos_chrony"
 echo "2) changing_other_configurations"
+echo "3) Configure_LVM"
 echo "q) Quit"
 
 while true; do
@@ -41,6 +42,9 @@ while true; do
         2)
             changing_other_configurations
             ;;
+        3) 
+            Configure_LVM 
+            ;;
         q|Q)
             echo "Exiting... Goodbye!"
             exit 0
@@ -50,3 +54,4 @@ while true; do
             ;;
     esac
 done
+)
