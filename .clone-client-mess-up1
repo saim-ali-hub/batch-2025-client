@@ -76,7 +76,8 @@ rm -rf /tmp/myscript >/dev/null 2>&1
 rm -rf /tmp/new_file >/dev/null 2>&1
 rm -rf /tmp/ssh-data >/dev/null 2>&1
 rm -rf /tmp/log_msg >/dev/null 2>&1
-
+}
+Configure_LVM() {
 echo "RUNNING TASK 9 ......................."
 
 # Task 19 Cleanup (vg1/lv1)
